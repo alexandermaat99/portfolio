@@ -1,0 +1,116 @@
+/* page.module.css */
+.container {
+  width: 100vw;
+  height: 100vh;
+  padding: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #fdf6ec;
+}
+
+.redBox {
+  width: 95%;
+  height: 95%;
+  border: 2px solid #ff0000;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background-color: white;
+}
+
+.leftColumn {
+  position: relative;
+  height: 100%;
+  padding: 2rem;
+}
+
+.imageContainer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: #1a1a1a;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center; /* Centers horizontally */
+  padding: 2rem;
+  color: #ff0000;
+  text-align: center; /* Centers text content */
+}
+
+.navItem {
+  width: 100%;
+  text-align: center;
+  cursor: pointer;
+  margin: 1rem 0;
+  transition: transform 0.2s;
+}
+
+.navItem h2 {
+  font-size: 2rem;
+  margin: 0;
+}
+
+.subtitle {
+  color: #ff0000;
+  font-size: 1rem;
+  margin-top: 0.5rem;
+}
+
+.navItem:hover {
+  transform: translateX(10px);
+}
+
+.navItem.active {
+  color: #ff0000;
+}
+
+.rightColumn {
+  padding: 2rem;
+  overflow-y: auto;
+  height: 100%;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.section {
+  min-height: 100vh;
+  padding: 2rem 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.sectionHeader {
+  margin-bottom: 2rem;
+}
+
+.sectionHeader h3 {
+  color: #ff0000;
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.sectionHeader h1 {
+  font-size: 3rem;
+  margin: 0;
+}
+
+.content {
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+.content p {
+  margin-bottom: 1.5rem;
+}

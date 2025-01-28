@@ -8,6 +8,10 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        poetsen: ["var(--font-poetsen-one)"],
+        "space-grotesk": ["var(--font-space-grotesk)"],
+      },
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
