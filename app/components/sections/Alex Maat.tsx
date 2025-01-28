@@ -1,6 +1,10 @@
 // app/components/sections/Present.tsx
 import SectionLayout from "../layouts/SectionLayout";
 import Image from "next/image";
+import dynamic from "next/dynamic";
+const GitHubCalendar = dynamic(() => import("react-github-calendar"), {
+  ssr: false,
+});
 
 // import Image from "next/image";
 
@@ -65,6 +69,12 @@ export default function Me() {
               height={40}
             />
           </a>
+        </div>
+        <div className="mt-6">
+          <h3 className="text-lg font-semibold mb-2">
+            My GitHub Contributions
+          </h3>
+          <GitHubCalendar username="alexandermaat99" />
         </div>
       </div>
     </SectionLayout>
