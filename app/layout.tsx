@@ -17,8 +17,8 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "Portfolio",
-  description: "Personal Portfolio Website",
+  title: "Alex Maat",
+  description: "Alexander Maat's Portfolio",
 };
 
 export default function RootLayout({

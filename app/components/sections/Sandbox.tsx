@@ -8,7 +8,7 @@ export default function Sandbox() {
       <div className="flex flex-col gap-4 md:gap-6">
         <p className="text-gray-800 text-base md:text-lg leading-relaxed">
           Sandbox is Brigham Young University&apos;s startup incubator. Over the
-          of course 2 semesters, I worked with a team to create a SAS startup
+          course of 2 semesters, I worked with a team to create a SAS startup
           that would eventually gain investor funding.
         </p>
 
