@@ -16,8 +16,8 @@ export default function Me() {
         <p className="text-gray-800 text-base md:text-lg leading-relaxed dark:text-white">
           Hello! I&apos;m a software developer based in Lehi, UT passionate
           about developing engaging and pleasing user experiences. <br></br>{" "}
-          <br></br> With my fresh Information Systems degree from Brigham Young
-          University (December 2024) I&apos;m excited to apply my unique
+          <br></br> With my new Information Systems degree from Brigham Young
+          University (December 2024) I&apos;m excited to apply my fresh
           perspective and growing skills to real-world projects. <br></br>{" "}
           <br></br>Curious about the projects that showcase my potential?
           Explore further to see how I can bring value to your team.
@@ -71,6 +71,15 @@ export default function Me() {
             />
           </a>
         </div>
+        <div className="pb-5 pt-5 text-gray-800 dark:text-white ">
+          {" "}
+          <p className=" text-base md:text-lg leading-relaxed font-bold underline">
+            Currently
+          </p>
+          <ul>- Seeking software development opportunities</ul>
+          <ul>- Deepening my skills in Java and SQL through online courses</ul>
+        </div>
+
         <div className="mt-6">
           <h3 className="text-lg font-semibold mb-2">
             My GitHub Contributions

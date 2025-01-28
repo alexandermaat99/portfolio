@@ -31,6 +31,16 @@ const sections: Section[] = [
       ssr: false,
     }),
   },
+  {
+    id: "The Pattern's Place",
+    title: "The Pattern's Place",
+    component: dynamic(
+      () => import("./components/sections/The Patterns Place"),
+      {
+        ssr: false,
+      }
+    ),
+  },
 ];
 
 export default function Home() {
