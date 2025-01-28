@@ -27,33 +27,7 @@ export default function Me() {
         </a>
         <div className="flex gap-4 justify-end">
           <a
-            href="https://github.com/yourusername"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="cursor-pointer"
-          >
-            <Image
-              src="/images/github.png"
-              alt="GitHub"
-              width={40}
-              height={40}
-            />
-          </a>
-          <a
-            href="https://instagram.com/yourusername"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="cursor-pointer"
-          >
-            <Image
-              src="/images/instagram.png"
-              alt="Instagram"
-              width={40}
-              height={40}
-            />
-          </a>
-          <a
-            href="https://linkedin.com/in/yourusername"
+            href="https://www.linkedin.com/in/alexander-m-b88328111/"
             target="_blank"
             rel="noopener noreferrer"
             className="cursor-pointer"
@@ -61,6 +35,32 @@ export default function Me() {
             <Image
               src="/images/linkedin.png"
               alt="LinkedIn"
+              width={40}
+              height={40}
+            />
+          </a>
+          <a
+            href="https://github.com/alexandermaat99"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="cursor-pointer"
+          >
+            <Image
+              src="/images/gitHub.png"
+              alt="GitHub"
+              width={40}
+              height={40}
+            />
+          </a>
+          <a
+            href="https://www.instagram.com/alex.maat/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="cursor-pointer"
+          >
+            <Image
+              src="/images/instagram.png"
+              alt="Instagram"
               width={40}
               height={40}
             />
