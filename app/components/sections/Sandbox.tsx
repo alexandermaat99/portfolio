@@ -7,7 +7,7 @@ export default function Sandbox() {
     <SectionLayout title="Sandbox 02" id="sandbox">
       <div className="flex flex-col gap-4 md:gap-6">
         <p className="text-red-600 text-base md:text-base leading-relaxed dark:text-red-600">
-          TLDR: Took part in BYU startup incubator as a designer to develop SAS
+          TLDR: Took part in BYU startup incubator as a designer to develop SaaS
           apps.
         </p>
         <p className="text-gray-800 text-base md:text-lg leading-relaxed dark:text-white">
