@@ -1,6 +1,7 @@
 // app/components/sections/Present.tsx
 import SectionLayout from "../layouts/SectionLayout";
 import Image from "next/image";
+
 import dynamic from "next/dynamic";
 const GitHubCalendar = dynamic(() => import("react-github-calendar"), {
   ssr: false,
@@ -12,7 +13,7 @@ export default function Me() {
   return (
     <SectionLayout title="Alex Maat" id="About Me">
       <div className="flex flex-col gap-4 md:gap-6">
-        <p className="text-gray-800 text-base md:text-lg leading-relaxed">
+        <p className="text-gray-800 text-base md:text-lg leading-relaxed dark:text-white">
           Hello! I&apos;m a software developer based in Lehi, UT passionate
           about developing engaging and pleasing user experiences. <br></br>{" "}
           <br></br> With my fresh Information Systems degree from Brigham Young

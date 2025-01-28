@@ -95,7 +95,7 @@ export default function Home() {
   }
 
   return (
-    <div className="w-screen h-screen p-4 md:p-8 bg-[#FDF6EC] flex justify-center items-center">
+    <div className="w-screen h-screen p-4 md:p-8 dark:bg-black bg-[#fff8ed] flex justify-center items-center">
       <div className="w-full md:w-[1200px] h-[100%] border-2 border-red-600 grid grid-cols-1 md:grid-cols-2">
         <div className="relative h-[200px] md:h-full p-4 md:p-8">
           <div className="relative w-full h-full bg-[#1a1a1a]">

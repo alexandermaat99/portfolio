@@ -6,13 +6,13 @@ export default function Sandbox() {
   return (
     <SectionLayout title="WebStream" id="Rapid Development">
       <div className="flex flex-col gap-4 md:gap-6">
-        <p className="text-gray-800 text-base md:text-lg leading-relaxed">
+        <p className="text-gray-800 text-base md:text-lg leading-relaxed dark:text-white">
           Fed up with the clunky software on our smart tv, I developed an
           extremely simple web app that allows users to turn their browser into
           a pseudo-smart tv home screen.
         </p>
 
-        <p className="text-gray-800 text-base md:text-lg leading-relaxed">
+        <p className="text-gray-800 text-base md:text-lg leading-relaxed dark:text-white">
           I prototyped in Figma, developed in TypeScript and deployed using
           Vercel within an hour.
         </p>
