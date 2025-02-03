@@ -18,7 +18,7 @@ export default function Sandbox() {
 
         <p className="text-gray-800 text-base md:text-lg leading-relaxed dark:text-white">
           Within a team of 3, I worked as the sole designer to create the UX/UI
-          for multiple SAS platforms.
+          for multiple SaaS platforms.
         </p>
         <div className="mt-4 md:mt-8">
           <Image
