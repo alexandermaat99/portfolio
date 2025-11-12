@@ -4,7 +4,7 @@ import Image from "next/image";
 
 export default function thepatternsplace() {
   return (
-    <SectionLayout title="The Pattern's Place" id="Developing a Marketplace">
+    <SectionLayout title="The Pattern's Place" id="The Pattern's Place">
       <div className="flex flex-col gap-4 md:gap-6">
         <p className="text-gray-800 text-base md:text-lg leading-relaxed dark:text-white">
           My wife, an avid sewist, struggled to find a modern marketplace sewing

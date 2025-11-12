@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 
@@ -46,6 +46,7 @@ const sections: Section[] = [
 export default function Home() {
   const [activeSection, setActiveSection] = useState<string>(sections[0].id);
   const [isMobile, setIsMobile] = useState<boolean | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -68,23 +69,63 @@ export default function Home() {
 
   useEffect(() => {
     if (isMobile === false) {
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              setActiveSection(entry.target.id);
+      let observer: IntersectionObserver | null = null;
+
+      const setupObserver = () => {
+        const scrollContainer = scrollContainerRef.current;
+        if (!scrollContainer) return;
+
+        // Disconnect existing observer if any
+        if (observer) {
+          observer.disconnect();
+        }
+
+        observer = new IntersectionObserver(
+          (entries) => {
+            // Find the section with the highest intersection ratio
+            let maxRatio = 0;
+            let activeId = sections[0].id;
+
+            entries.forEach((entry) => {
+              if (entry.intersectionRatio > maxRatio) {
+                maxRatio = entry.intersectionRatio;
+                activeId = entry.target.id;
+              }
+            });
+
+            // Update active section if we found one with significant visibility
+            if (maxRatio > 0.1) {
+              setActiveSection(activeId);
             }
-          });
-        },
-        { threshold: 0.5 }
-      );
+          },
+          {
+            root: scrollContainer,
+            threshold: [0, 0.1, 0.25, 0.5, 0.75, 1],
+            rootMargin: "-40% 0px -40% 0px",
+          }
+        );
 
-      sections.forEach((section) => {
-        const element = document.getElementById(section.id);
-        if (element) observer.observe(element);
-      });
+        // Observe all sections that are available
+        sections.forEach((section) => {
+          const element = document.getElementById(section.id);
+          if (element && observer) {
+            observer.observe(element);
+          }
+        });
+      };
 
-      return () => observer.disconnect();
+      // Wait for DOM to be ready and dynamic components to load
+      const timeoutId1 = setTimeout(setupObserver, 300);
+      // Retry once more in case dynamic components take longer
+      const timeoutId2 = setTimeout(setupObserver, 600);
+
+      return () => {
+        clearTimeout(timeoutId1);
+        clearTimeout(timeoutId2);
+        if (observer) {
+          observer.disconnect();
+        }
+      };
     }
   }, [isMobile]);
 
@@ -143,7 +184,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-        <div className="p-4 md:p-8 overflow-y-auto no-scrollbar">
+        <div ref={scrollContainerRef} className="p-4 md:p-8 overflow-y-auto no-scrollbar">
           {isMobile ? (
             <div id={activeSection}>
               {(() => {
@@ -154,11 +195,14 @@ export default function Home() {
               })()}
             </div>
           ) : (
-            sections.map((section) => (
-              <div key={section.id} id={section.id}>
-                <section.component />
-              </div>
-            ))
+            sections.map((section) => {
+              const Component = section.component;
+              return (
+                <div key={section.id} id={section.id}>
+                  <Component />
+                </div>
+              );
+            })
           )}
         </div>
       </div>
