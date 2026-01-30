@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "NODE_OPTIONS='--disable-warning=ExperimentalWarning' BASELINE_BROWSER_MAPPING_SKIP_WARNING=1 next dev --turbopack",
-    "build": "BASELINE_BROWSER_MAPPING_SKIP_WARNING=1 next build",
+    "dev": "NODE_OPTIONS='--disable-warning=ExperimentalWarning' next dev --turbopack",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
