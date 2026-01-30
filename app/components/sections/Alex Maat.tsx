@@ -15,12 +15,16 @@ export default function Me() {
       <div className="flex flex-col gap-4 md:gap-6">
         <p className="text-gray-800 text-base md:text-lg leading-relaxed dark:text-white">
           Hello! I&apos;m a software developer based in Lehi, UT passionate
-          about developing engaging and pleasing user experiences. <br></br>{" "}
-          <br></br> With my new Information Systems degree from Brigham Young
-          University (December 2024) I&apos;m excited to apply my fresh
-          perspective and growing skills to real-world projects. <br></br>{" "}
-          <br></br>Curious about the projects that showcase my potential?
-          Explore further to see how I can bring value to your team.
+          about developing engaging and pleasing user experiences. 
+          <br></br>{" "} <br></br> 
+          
+          Since earning my Information Systems degree from Brigham Young University in December 2024, I&apos;ve 
+          been working as a C++ engineer, where I build reliable, performant core enhancements on credit union core systems. 
+          <br></br>{" "}<br></br>
+          Outside of work, I recently launched The Pattern's Place, an online marketplace for sewing and patterns.
+          <br></br>
+          <span className="italic text-red-600 text-sm">(typescript, next.js, supabase)</span>
+          
         </p>
 
         <a
@@ -76,8 +80,8 @@ export default function Me() {
           <p className=" text-base md:text-lg leading-relaxed font-bold underline">
             Currently
           </p>
-          <ul>- Seeking software development opportunities</ul>
-          <ul>- Deepening my skills in Java and SQL through online courses</ul>
+          <ul>- Embracing ai development tools to streamline my workflow</ul>
+          <ul>- Deepening my skills in TypeScript through personal projects</ul>
         </div>
 
         <div className="mt-6">

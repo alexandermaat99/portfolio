@@ -16,18 +16,16 @@ export default function thepatternsplace() {
         </p>
 
         <p className="text-gray-800 text-base md:text-lg leading-relaxed dark:text-white">
-          I&apos;m currently developing a online marketplace for sewing patterns
-          called The Pattern&apos;s Place.
-        </p>
-        <p className="text-gray-800 font-semibold text-base md:text-sm leading-relaxed dark:text-white">
-          Stack: Next.js, TypeScript, Supabase
+          We&apos;ve recently launched The Pattern&apos;s Place, an online marketplace for sewing patterns.
+          <br></br>
+          <span className="italic text-red-600 text-sm">(typescript, next.js, supabase)</span>
         </p>
         <a
           href="https://thepatternsplace.com/"
           className="inline-block bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700 transition duration-300 text-center"
           target="_blank"
         >
-          Visit Our Landing Page
+          Check it out!
         </a>
 
         <div className="mt-4 md:mt-8">
