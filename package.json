@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "NODE_OPTIONS='--disable-warning=ExperimentalWarning' next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -15,6 +15,7 @@
     "react-github-calendar": "^4.5.5"
   },
   "devDependencies": {
+    "baseline-browser-mapping": "^2.8.26",
     "@eslint/eslintrc": "^3",
     "@types/node": "^20",
     "@types/react": "^19",

@@ -16,9 +16,10 @@ export default function Me() {
         <p className="text-gray-800 text-base md:text-lg leading-relaxed dark:text-white">
           Hello! I&apos;m a software developer based in Lehi, UT passionate
           about developing engaging and pleasing user experiences. <br></br>{" "}
-          <br></br> With my new Information Systems degree from Brigham Young
-          University (December 2024) I&apos;m excited to apply my fresh
-          perspective and growing skills to real-world projects. <br></br>{" "}
+          <br></br> Since earning my Information Systems degree from Brigham Young University in December 2024 I&apos;ve been
+          working as a C++ engineer, where I build reliable, performant core enhancements on credit union core systems.
+          
+          <br></br>{" "}
           <br></br>Curious about the projects that showcase my potential?
           Explore further to see how I can bring value to your team.
         </p>
