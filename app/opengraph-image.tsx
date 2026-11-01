@@ -1,7 +1,7 @@
 // app/opengraph-image.tsx
 import { ImageResponse } from "next/og";
 
-export const alt = "Alex Maat | Software Engineer";
+export const alt = "Alex Maat | Product Manager";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -32,7 +32,7 @@ export default function OpengraphImage() {
             Alex Maat
           </div>
           <div style={{ fontSize: 44, color: "#1f2937" }}>
-            Software Engineer · Lehi, UT
+            Product Manager · Lehi, UT
           </div>
         </div>
       </div>
