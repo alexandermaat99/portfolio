@@ -1,27 +1,31 @@
 // app/components/layouts/SectionLayout.tsx
 interface SectionLayoutProps {
-  title: string;
   id: string;
+  eyebrow: string;
+  title: string;
   children: React.ReactNode;
 }
 
 export default function SectionLayout({
-  title,
   id,
+  eyebrow,
+  title,
   children,
 }: SectionLayoutProps) {
   return (
-    <section className=" py-4 min-h-screen md:py-8 font-space-grotesk">
-      <div className="mb-4 md:mb-8 pb-11 w-full font-space-grotesk dark:text-white">
-        <h3 className="text-red-600 text-lg md:text-xl mb-2 font-space-grotesk">
-          {title}
-        </h3>
-        <div className="flex justify-center mb-4 md:mb-4">
-          <h1 className="text-3xl md:text-4xl font-bold">
-            {id === "sandbox" ? "_" : ""}
-            {id}
-          </h1>
-        </div>
+    <section
+      id={id}
+      aria-labelledby={`${id}-heading`}
+      className="scroll-mt-4 py-10 md:py-16 border-b border-red-600/20 last:border-b-0 font-space-grotesk text-gray-800 dark:text-gray-100"
+    >
+      <p className="text-red-600 text-base md:text-lg mb-1">{eyebrow}</p>
+      <h2
+        id={`${id}-heading`}
+        className="text-3xl md:text-4xl font-bold text-black dark:text-white mb-6"
+      >
+        {title}
+      </h2>
+      <div className="flex flex-col gap-5 text-base md:text-lg leading-relaxed">
         {children}
       </div>
     </section>
