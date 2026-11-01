@@ -10,7 +10,7 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 const description =
-  "Alex Maat is a product manager at Brite in Lehi, UT with a background in C++ engineering, and the builder behind The Pattern's Place.";
+  "Alex Maat is a product manager at Brite, leading Benefits Flow and AI decision support, with a background in C++ engineering.";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.alexandermaat.com"),

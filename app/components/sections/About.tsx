@@ -24,22 +24,19 @@ export default function About() {
         user experiences.
       </p>
       <p>
-        I recently joined{" "}
+        Today I&apos;m a Product Manager at Brite, where I own{" "}
         <a
-          href="https://www.britebenefits.com/"
-          target="_blank"
-          rel="noopener noreferrer"
+          href="#brite"
           className="text-red-600 underline decoration-red-600/40 underline-offset-4 hover:decoration-red-600"
         >
-          Brite
-        </a>{" "}
-        as a Product Manager, where we help guide employees to better benefit
-        decisions.
+          Benefits Flow and our AI decision support tool
+        </a>
+        .
       </p>
       <p>
-        Before that, after earning my Information Systems degree from Brigham
+        Before Brite, after earning my Information Systems degree from Brigham
         Young University in December 2024, I was a Core Developer at
-        Correlation, Inc., writing C++ for the KeyStone banking platform and
+        Corelation, Inc., writing C++ for the KeyStone banking platform and
         building reliable, performant core enhancements for credit unions.
       </p>
       <p>

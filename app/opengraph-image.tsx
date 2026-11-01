@@ -32,7 +32,7 @@ export default function OpengraphImage() {
             Alex Maat
           </div>
           <div style={{ fontSize: 44, color: "#1f2937" }}>
-            Product Manager · Lehi, UT
+            Product Manager @ Brite · Lehi, UT
           </div>
         </div>
       </div>
