@@ -9,7 +9,7 @@ const EMAIL = "alexander.a.maat@gmail.com";
 const socials = [
   {
     label: "LinkedIn",
-    href: "https://www.linkedin.com/in/alexander-m-b88328111/",
+    href: "https://www.linkedin.com/in/alexander-maat/",
   },
   { label: "GitHub", href: "https://github.com/alexandermaat99" },
   { label: "Instagram", href: "https://www.instagram.com/alex.maat/" },
@@ -19,14 +19,25 @@ export default function About() {
   return (
     <SectionLayout id="about" eyebrow="Alex Maat" title="About Me">
       <p>
-        Hello! I&apos;m a software developer based in Lehi, UT, passionate
-        about building engaging, delightful user experiences.
+        Hello! I&apos;m a product manager based in Lehi, UT, with a software
+        engineering background and a passion for building engaging, delightful
+        user experiences.
       </p>
       <p>
-        Since earning my Information Systems degree from Brigham Young
-        University in December 2024, I&apos;ve been a Core Developer at
-        Correlation, Inc., writing C++ for the KeyStone banking platform, where
-        I build reliable, performant core enhancements for credit unions.
+        Today I&apos;m a Product Manager at Brite, where I own{" "}
+        <a
+          href="#brite"
+          className="text-red-600 underline decoration-red-600/40 underline-offset-4 hover:decoration-red-600"
+        >
+          Benefits Flow and our AI decision support tool
+        </a>
+        .
+      </p>
+      <p>
+        Before Brite, after earning my Information Systems degree from Brigham
+        Young University in December 2024, I was a Core Developer at
+        Corelation, Inc., writing C++ for the KeyStone banking platform and
+        building reliable, performant core enhancements for credit unions.
       </p>
       <p>
         Outside of work, I recently launched{" "}

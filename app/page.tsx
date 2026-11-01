@@ -1,6 +1,7 @@
 // app/page.tsx
 import PhotoNav from "./components/PhotoNav";
 import About from "./components/sections/About";
+import Brite from "./components/sections/Brite";
 import PatternsPlace from "./components/sections/PatternsPlace";
 import WebStream from "./components/sections/WebStream";
 import Sandbox from "./components/sections/Sandbox";
@@ -17,6 +18,7 @@ export default function Home() {
           className="px-4 md:px-8 md:overflow-y-auto md:min-h-0"
         >
           <About />
+          <Brite />
           <PatternsPlace />
           <WebStream />
           <Sandbox />
