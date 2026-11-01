@@ -7,7 +7,7 @@
     "dev:turbo": "NODE_OPTIONS='--disable-warning=ExperimentalWarning' next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint ."
   },
   "dependencies": {
     "next": "^16.1.6",
