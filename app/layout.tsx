@@ -10,16 +10,16 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 const description =
-  "Alex Maat is a software engineer in Lehi, UT building C++ banking systems by day and products like The Pattern's Place by night.";
+  "Alex Maat is a product manager at Brite, leading Benefits Flow and AI decision support, with a background in C++ engineering.";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.alexandermaat.com"),
-  title: "Alex Maat | Software Engineer",
+  title: "Alex Maat | Product Manager",
   description,
   authors: [{ name: "Alexander Maat" }],
   alternates: { canonical: "/" },
   openGraph: {
-    title: "Alex Maat | Software Engineer",
+    title: "Alex Maat | Product Manager",
     description,
     url: "/",
     siteName: "Alex Maat",
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Alex Maat | Software Engineer",
+    title: "Alex Maat | Product Manager",
     description,
   },
 };
