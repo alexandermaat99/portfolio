@@ -39,7 +39,9 @@ export async function POST(req: Request) {
     await saveSnapshot(kind as SnapshotKind, JSON.stringify(parsed.payload));
   } catch (e) {
     console.error("racing ingest failed", e);
-    return Response.json({ error: "Storage unavailable" }, { status: 503 });
+    // Caller is authenticated (the sim PC), so it's fine to say why.
+    const reason = e instanceof Error ? e.message : String(e);
+    return Response.json({ error: "Storage unavailable", reason }, { status: 503 });
   }
   return Response.json({ ok: true });
 }
