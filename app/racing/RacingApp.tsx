@@ -5,7 +5,7 @@
 import Link from "next/link";
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type CSSProperties } from "react";
 import s from "./racing.module.css";
-import { Avatar, BrandLogo, CarLabel, TrackIcon, TrackMapsContext } from "./visuals";
+import { Avatar, BrandLogo, CarLabel, DriverName, nick, TrackIcon, TrackMapsContext } from "./visuals";
 import type { Combo, ComboStandings, Driver, Lap, LiveEvent, Night, RacingSnapshot, Standing } from "./lib/types";
 
 type Tab = "live" | "records" | "nights";
@@ -188,7 +188,7 @@ export default function RacingApp({ initial }: { initial: RacingSnapshot }) {
             <Avatar driver={e.driver} size="md" />
             <div style={{ flex: 1 }}>
               <div className={s.toastLabel}>{BADGE_LABELS[e.type] ?? "New lap"}</div>
-              <b>{e.driver?.name ?? "Unassigned"}</b> <span className={s.muted}>· Lap {e.lap.lap_number}</span>
+              <b>{e.driver ? nick(e.driver) : "Unassigned"}</b> <span className={s.muted}>· Lap {e.lap.lap_number}</span>
               {!e.lap.clean && <span className={s.muted}> · not clean</span>}
             </div>
             <div className={`${s.t} ${s.num} ${e.lap.clean ? "" : s.muted}`}>{fmtLap(e.lap.lap_time)}</div>
@@ -255,7 +255,7 @@ function LiveView({
           <div className={`${s.small} ${s.muted}`}>{isLive ? "NOW DRIVING" : tonightActive ? "TONIGHT" : "LATEST"}</div>
           <div className={s.driverName}>
             {isLive && driver && <Avatar driver={driver} size="lg" />}
-            {isLive ? driver?.name ?? "Driver swap…" : data.nights[0] ? fmtDay(data.nights[0].started_at) : "—"}
+            {isLive ? (driver ? <DriverName driver={driver} size="lg" /> : "Driver swap…") : data.nights[0] ? fmtDay(data.nights[0].started_at) : "—"}
           </div>
         </div>
         <div>{chip}</div>
@@ -364,7 +364,7 @@ function StandingsTable({
   const drivers = useContext(DriversContext);
   if (!rows.length) return <div className={s.empty}>No laps yet.</div>;
   const driverOf = (r: Standing) =>
-    drivers.find((d) => d.id === r.driver_id) ?? { id: r.driver_id, name: r.name, color: r.color };
+    drivers.find((d) => d.id === r.driver_id) ?? { id: r.driver_id, name: r.name, nickname: r.nickname, color: r.color };
   // Only show which car a best lap was in when drivers used different cars here.
   const mixedCars = new Set(rows.map((r) => r.best_car).filter(Boolean)).size > 1;
   return (
@@ -388,8 +388,8 @@ function StandingsTable({
               <span className={s.nameInner}>
                 <Avatar driver={driverOf(r)} size="sm" />
                 <span>
-                  {r.name}
-                  {r.driver_id === current && <span className={s.driving}>driving</span>}
+                  <DriverName driver={r} />
+                  {r.driver_id === current && <span className={`${s.driving} ${s.drivingBelow}`}>driving</span>}
                   {r.best_car && mixedCars && (
                     <span className={s.bestCar}>
                       <CarLabel car={r.best_car} />
@@ -431,7 +431,7 @@ function LapList({
             <span className={s.lapBar} />
             <span className={s.who}>
               {d && <Avatar driver={d} size="xs" />}
-              {d?.name ?? "Unassigned"}
+              {d ? <DriverName driver={d} inline /> : "Unassigned"}
             </span>
             <span className={`${s.t} ${colorFor(lap)}`}>{fmtLap(lap.lap_time)}</span>
             <span className={s.lapMeta}>

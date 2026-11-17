@@ -4,6 +4,7 @@
 export interface Driver {
   id: number;
   name: string;
+  nickname?: string | null; // shown big; the real name goes underneath
   color: string;
   archived?: number;
   photo?: string | null; // photo hash; image at /api/racing/photo/<id>?v=<hash>
@@ -24,6 +25,7 @@ export interface Standing {
   pos: number;
   driver_id: number;
   name: string;
+  nickname?: string | null;
   color: string;
   best: number | null;
   best_car: string | null; // car the best lap was set in
@@ -85,7 +87,7 @@ export interface LiveEvent {
   id: number;
   type: "lap" | "record" | "night_best" | "pb";
   at: number;
-  driver: { id?: number; name: string; color: string; photo?: string | null } | null;
+  driver: { id?: number; name: string; nickname?: string | null; color: string; photo?: string | null } | null;
   lap: { lap_number: number; lap_time: number; clean: number; incidents: number };
 }
 
