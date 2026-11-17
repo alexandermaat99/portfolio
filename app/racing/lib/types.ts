@@ -6,6 +6,7 @@ export interface Driver {
   name: string;
   color: string;
   archived?: number;
+  photo?: string | null; // photo hash; image at /api/racing/photo/<id>?v=<hash>
 }
 
 /** A track layout (records are per track, any car). */
@@ -71,6 +72,7 @@ export interface Night {
 export interface RacingData {
   updated_at: number;
   local_url: string | null; // the full app on the home network
+  track_maps?: Record<string, string>; // track key -> SVG path of the outline (0-100 box)
   drivers: Driver[];
   session_id: number | null;
   tonight: ComboStandings[];
@@ -83,7 +85,7 @@ export interface LiveEvent {
   id: number;
   type: "lap" | "record" | "night_best" | "pb";
   at: number;
-  driver: { name: string; color: string } | null;
+  driver: { id?: number; name: string; color: string; photo?: string | null } | null;
   lap: { lap_number: number; lap_time: number; clean: number; incidents: number };
 }
 

@@ -6,6 +6,7 @@ import type { RacingData, RacingLive, RacingSnapshot } from "./types";
 
 const KEYS = { live: "racing:live", data: "racing:data" } as const;
 export type SnapshotKind = keyof typeof KEYS;
+const photoKey = (driverId: number) => `racing:photo:${driverId}`;
 
 // Upstash via the Vercel Marketplace names its variables KV_REST_API_URL / _TOKEN or
 // UPSTASH_REDIS_REST_URL / _TOKEN, optionally with a custom prefix, so match by suffix.
@@ -58,6 +59,26 @@ export async function saveSnapshot(kind: SnapshotKind, json: string): Promise<vo
   if (redisConfig()) await redis(["SET", KEYS[kind], json]);
   else if (process.env.NODE_ENV !== "production") memory.set(KEYS[kind], json);
   else throw new Error(`Storage not configured (storage env vars found: ${storageEnvNames().join(", ") || "none"})`);
+}
+
+/** Driver photos are stored separately (and uploaded only when they change). */
+export async function savePhoto(driverId: number, hash: string, base64Jpeg: string): Promise<void> {
+  const value = JSON.stringify({ hash, data: base64Jpeg });
+  if (redisConfig()) await redis(["SET", photoKey(driverId), value]);
+  else if (process.env.NODE_ENV !== "production") memory.set(photoKey(driverId), value);
+  else throw new Error("Storage not configured");
+}
+
+export async function loadPhoto(driverId: number): Promise<{ hash: string; data: string } | null> {
+  const raw = redisConfig()
+    ? ((await redis(["GET", photoKey(driverId)])) as string | null)
+    : memory.get(photoKey(driverId)) ?? null;
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
 }
 
 export async function loadSnapshot(): Promise<RacingSnapshot> {

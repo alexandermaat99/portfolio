@@ -3,11 +3,14 @@
 // No live lap timer here; new laps pop up and standings refresh as they're set.
 
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type CSSProperties } from "react";
 import s from "./racing.module.css";
+import { Avatar, BrandLogo, CarLabel, TrackIcon, TrackMapsContext } from "./visuals";
 import type { Combo, ComboStandings, Driver, Lap, LiveEvent, Night, RacingSnapshot, Standing } from "./lib/types";
 
 type Tab = "live" | "records" | "nights";
+
+const DriversContext = createContext<Driver[]>([]);
 
 const LIVE_WINDOW = 30; // seconds without an update before we call it offline
 const BADGE_LABELS: Partial<Record<LiveEvent["type"], string>> = {
@@ -31,7 +34,17 @@ const fmtDay = (ts: number) =>
 const trackTitle = (c: { track_name: string; track_config: string }) =>
   `${c.track_name}${c.track_config ? ` – ${c.track_config}` : ""}`;
 const trackKey = (l: { track_id: number; track_config: string }) => `${l.track_id}|${l.track_config}`;
-const carsLabel = (c: Combo) => (c.cars?.length ? c.cars.join(", ") : "");
+function CarsList({ cars }: { cars?: string[] }) {
+  return (
+    <>
+      {(cars ?? []).map((c) => (
+        <span key={c} className={s.carItem}>
+          <CarLabel car={c} />
+        </span>
+      ))}
+    </>
+  );
+}
 const colorVar = (c: string | undefined) => ({ "--c": c ?? "var(--border)" }) as CSSProperties;
 
 // -- component -----------------------------------------------------------------
@@ -103,6 +116,8 @@ export default function RacingApp({ initial }: { initial: RacingSnapshot }) {
         : "Offline";
 
   return (
+    <TrackMapsContext.Provider value={data?.track_maps ?? {}}>
+    <DriversContext.Provider value={data?.drivers ?? []}>
     <div className={s.root}>
       <header className={s.topbar}>
         <div className={s.brand}>
@@ -170,7 +185,8 @@ export default function RacingApp({ initial }: { initial: RacingSnapshot }) {
       <div className={s.toasts} aria-live="polite">
         {toasts.map((e) => (
           <div key={e.id} className={s.toast} style={colorVar(e.driver?.color)}>
-            <div>
+            <Avatar driver={e.driver} size="md" />
+            <div style={{ flex: 1 }}>
               <div className={s.toastLabel}>{BADGE_LABELS[e.type] ?? "New lap"}</div>
               <b>{e.driver?.name ?? "Unassigned"}</b> <span className={s.muted}>· Lap {e.lap.lap_number}</span>
               {!e.lap.clean && <span className={s.muted}> · not clean</span>}
@@ -180,6 +196,8 @@ export default function RacingApp({ initial }: { initial: RacingSnapshot }) {
         ))}
       </div>
     </div>
+    </DriversContext.Provider>
+    </TrackMapsContext.Provider>
   );
 }
 
@@ -236,6 +254,7 @@ function LiveView({
         <div>
           <div className={`${s.small} ${s.muted}`}>{isLive ? "NOW DRIVING" : tonightActive ? "TONIGHT" : "LATEST"}</div>
           <div className={s.driverName}>
+            {isLive && driver && <Avatar driver={driver} size="lg" />}
             {isLive ? driver?.name ?? "Driver swap…" : data.nights[0] ? fmtDay(data.nights[0].started_at) : "—"}
           </div>
         </div>
@@ -244,11 +263,11 @@ function LiveView({
       {!isLive && <div className={s.note}>Not racing right now. This shows the latest session.</div>}
       {title && (
         <dl className={`${s.comboInfo} ${isLive ? "" : s.stale}`}>
-          <div><dt>Track</dt><dd>{title.track_name}</dd></div>
+          <div><dt>Track</dt><dd><TrackIcon trackKey={key} />{title.track_name}</dd></div>
           <div><dt>Layout</dt><dd>{title.track_config || "Default"}</dd></div>
           <div>
             <dt>Car</dt>
-            <dd>{ctx ? ctx.car_name : featured ? featured.cars?.[0] ?? "" : ""}</dd>
+            <dd><CarLabel car={ctx ? ctx.car_name : featured?.cars?.[0]} /></dd>
           </div>
         </dl>
       )}
@@ -274,15 +293,20 @@ function LiveView({
           </button>
         </span>
       </h2>
-      {title && <div className={s.comboSub}>{trackTitle(title)} · any car</div>}
+      {title && (
+        <div className={`${s.comboSub} ${s.boardSub}`}>
+          <TrackIcon trackKey={key} />
+          <span>{trackTitle(title)} · any car</span>
+        </div>
+      )}
       <StandingsTable rows={rows} current={isLive ? live?.current_driver_id : null} showLast={boardMode === "tonight"} />
       {others.length > 0 && (
         <div style={{ marginTop: 14 }}>
           <div className={`${s.small} ${s.muted}`} style={{ marginBottom: 8 }}>Also driven</div>
           {others.map((c) => (
             <div key={c.key} style={{ marginBottom: 12 }}>
-              <div style={{ fontWeight: 700, fontSize: "0.9rem" }}>{trackTitle(c)}</div>
-              <div className={s.comboSub} style={{ margin: "2px 0 6px" }}>{carsLabel(c)}</div>
+              <div className={s.titleRow} style={{ fontWeight: 700, fontSize: "0.9rem" }}><TrackIcon trackKey={c.key} />{trackTitle(c)}</div>
+              <div className={s.comboSub} style={{ margin: "2px 0 6px" }}><CarsList cars={c.cars} /></div>
               <StandingsTable rows={c.standings} />
             </div>
           ))}
@@ -337,7 +361,12 @@ function StandingsTable({
   showLast?: boolean;
   showAvg?: boolean;
 }) {
+  const drivers = useContext(DriversContext);
   if (!rows.length) return <div className={s.empty}>No laps yet.</div>;
+  const driverOf = (r: Standing) =>
+    drivers.find((d) => d.id === r.driver_id) ?? { id: r.driver_id, name: r.name, color: r.color };
+  // Only show which car a best lap was in when drivers used different cars here.
+  const mixedCars = new Set(rows.map((r) => r.best_car).filter(Boolean)).size > 1;
   return (
     <table className={`${s.board} ${s.num}`}>
       <thead>
@@ -357,11 +386,15 @@ function StandingsTable({
             <td className={s.pos}>{r.best != null ? r.pos : "–"}</td>
             <td className={s.name}>
               <span className={s.nameInner}>
-                <span className={s.bar} style={colorVar(r.color)} />
+                <Avatar driver={driverOf(r)} size="sm" />
                 <span>
                   {r.name}
                   {r.driver_id === current && <span className={s.driving}>driving</span>}
-                  {r.best_car && <span className={s.bestCar}>{r.best_car}</span>}
+                  {r.best_car && mixedCars && (
+                    <span className={s.bestCar}>
+                      <CarLabel car={r.best_car} />
+                    </span>
+                  )}
                 </span>
               </span>
             </td>
@@ -396,9 +429,13 @@ function LapList({
         return (
           <li key={lap.id} className={lap.clean ? "" : s.dirty} style={colorVar(d?.color)}>
             <span className={s.lapBar} />
-            <span className={s.who}>{d?.name ?? "Unassigned"}</span>
+            <span className={s.who}>
+              {d && <Avatar driver={d} size="xs" />}
+              {d?.name ?? "Unassigned"}
+            </span>
             <span className={`${s.t} ${colorFor(lap)}`}>{fmtLap(lap.lap_time)}</span>
             <span className={s.lapMeta}>
+              <BrandLogo car={lap.car_name} />
               {lap.car_name}
               {lap.incidents > 0 && <span className={`${s.chip} ${s.chipBad}`}>{lap.incidents}x</span>}
               {lap.off_track > 0 && !lap.incidents && <span className={`${s.chip} ${s.chipBad}`}>off track</span>}
@@ -420,9 +457,12 @@ function RecordsView({ tracks }: { tracks: ComboStandings[] }) {
       {tracks.map((c) => (
         <section key={c.key} className={s.card}>
           <div className={s.comboHead}>
-            <div>
-              <h3>{trackTitle(c)}</h3>
-              <div className={s.car}>{carsLabel(c)}</div>
+            <div className={s.titleRow}>
+              <TrackIcon trackKey={c.key} large />
+              <div>
+                <h3>{trackTitle(c)}</h3>
+                <div className={s.car}><CarsList cars={c.cars} /></div>
+              </div>
             </div>
             <div className={`${s.small} ${s.muted}`} style={{ textAlign: "right" }}>
               {c.laps} laps
@@ -467,9 +507,11 @@ function NightsView({
             <div className={s.nightBody}>
               {n.combos.map((c) => (
                 <div key={c.key}>
-                  <h4>
-                    {trackTitle(c)} <span className={s.muted} style={{ fontWeight: 400 }}>· {carsLabel(c)}</span>
+                  <h4 className={s.titleRow}>
+                    <TrackIcon trackKey={c.key} />
+                    {trackTitle(c)}
                   </h4>
+                  <div className={s.comboSub}><CarsList cars={c.cars} /></div>
                   <StandingsTable rows={c.standings} showAvg />
                 </div>
               ))}
