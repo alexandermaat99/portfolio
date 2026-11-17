@@ -203,3 +203,5 @@
 .dnameLg .realname { font-size: 0.85rem; margin-top: 2px; }
 .dnameInline { flex-direction: row; align-items: baseline; gap: 6px; }
 .drivingBelow { display: block; margin: 2px 0 0; }
+/* room for the photo's ring so it doesn't overlap the "NOW DRIVING" label */
+.driverName { margin-top: 10px; }
