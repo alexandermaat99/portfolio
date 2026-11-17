@@ -222,3 +222,11 @@
   .comboInfo > div { grid-template-columns: 1fr; gap: 4px; border-bottom: 0; border-left: 1px solid var(--hair); padding: 2px 14px; }
   .comboInfo > div:first-child { border-left: 0; padding-left: 0; }
 }
+
+/* narrow screens: keep the header tidy */
+.topbar { flex-wrap: wrap; row-gap: 6px; }
+.model { white-space: nowrap; }
+.status { margin-left: auto; }
+@media (max-width: 520px) {
+  .brand > .back { display: none; } /* also in the intro + footer */
+}
