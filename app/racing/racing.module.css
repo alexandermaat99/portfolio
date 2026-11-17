@@ -42,6 +42,15 @@
 .intro { color: var(--muted); font-size: 0.95rem; margin: 4px 0 16px; line-height: 1.5; }
 .intro a { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
 
+/* "open the full app" (home network only) */
+.localBox { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin: 0 0 18px; }
+.localBtn {
+  display: inline-flex; align-items: center; gap: 6px; padding: 9px 14px; border-radius: 10px;
+  border: 1px solid var(--accent); color: #fff; background: rgba(220, 38, 38, 0.15); font-weight: 700; font-size: 0.9rem;
+}
+.localBtn:hover { background: var(--accent); }
+.localNote { color: var(--muted); font-size: 0.78rem; }
+
 .tabs { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 1px solid var(--border); }
 .tab { background: none; border: 0; padding: 10px 14px; color: var(--muted); font: inherit; font-weight: 600; cursor: pointer; }
 .tab:hover { color: var(--text); }
@@ -69,17 +78,6 @@
 .comboInfo dd { margin: 0; font-weight: 700; }
 .stale dd { color: var(--muted); }
 .note { margin-top: 10px; font-size: 0.8rem; color: var(--night); }
-.timerRow { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin: 14px 0 6px; }
-.timer { font-size: 3.2rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
-.idle { color: var(--muted); }
-.deltaBox { background: none; border: 0; padding: 0 0 2px; text-align: right; color: inherit; font: inherit; cursor: pointer; flex: none; }
-.delta { font-size: 2.3rem; font-weight: 800; line-height: 1; letter-spacing: -0.02em; }
-.ahead { color: var(--pb); }
-.behind { color: var(--bad); }
-.deltaRef { font-size: 0.75rem; color: var(--muted); margin-top: 6px; line-height: 1.35; }
-.deltaMode { text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; }
-.progress { height: 4px; background: var(--card2); border-radius: 2px; overflow: hidden; }
-.progress > div { height: 100%; background: var(--driver, var(--accent)); transition: width 0.5s linear; }
 .meta { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 12px; font-size: 0.9rem; color: var(--muted); }
 .meta b { color: var(--text); }
 
@@ -107,7 +105,8 @@
 .board .p1 .pos { color: var(--night); }
 .board .best { font-weight: 800; font-size: 1.05rem; }
 .nameInner { display: inline-flex; align-items: center; gap: 8px; }
-.bar { width: 4px; height: 18px; border-radius: 2px; background: var(--c); flex: none; }
+.bar { width: 4px; height: 18px; border-radius: 2px; background: var(--c); flex: none; align-self: flex-start; margin-top: 2px; }
+.bestCar { display: block; font-size: 0.72rem; font-weight: 500; color: var(--muted); }
 .driving { margin-left: 8px; font-size: 0.62rem; color: var(--pb); text-transform: uppercase; letter-spacing: 0.06em; }
 .hideSm { display: none; }
 .comboSub { margin: -4px 0 10px; font-size: 0.8rem; color: var(--muted); }
