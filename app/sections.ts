@@ -3,6 +3,7 @@
 export const sections = [
   { id: "about", label: "Alex Maat" },
   { id: "brite", label: "Brite" },
+  { id: "simstats", label: "SimStats" },
   { id: "the-patterns-place", label: "The Pattern's Place" },
   { id: "webstream", label: "WebStream" },
   { id: "sandbox", label: "Sandbox 02" },
