@@ -8,13 +8,13 @@ export interface Driver {
   archived?: number;
 }
 
+/** A track layout (records are per track, any car). */
 export interface Combo {
   key: string;
   track_id: number;
   track_name: string;
   track_config: string;
-  car_id: number;
-  car_name: string;
+  cars: string[]; // cars driven here, most recent first
   laps?: number;
   nights?: number;
 }
@@ -25,6 +25,7 @@ export interface Standing {
   name: string;
   color: string;
   best: number | null;
+  best_car: string | null; // car the best lap was set in
   gap: number | null;
   avg5: number | null;
   last: number | null;
@@ -69,21 +70,13 @@ export interface Night {
 
 export interface RacingData {
   updated_at: number;
+  local_url: string | null; // the full app on the home network
   drivers: Driver[];
   session_id: number | null;
   tonight: ComboStandings[];
   recent_laps: Lap[];
   records: ComboStandings[];
   nights: Night[];
-}
-
-export interface DeltaRef {
-  label: string;
-  delta: number | null;
-  lap_time: number;
-  driver_id: number;
-  name: string;
-  color: string;
 }
 
 export interface LiveEvent {
@@ -98,18 +91,15 @@ export interface RacingLive {
   updated_at: number;
   connected: boolean;
   current_driver_id: number | null;
-  context: (Combo & { session_type: string }) | null;
-  car: {
-    on_track: boolean;
-    on_pit_road: boolean;
-    lap: number;
-    lap_time: number | null;
-    lap_pct: number;
-    incidents: number;
-    clean_so_far: boolean;
-    flags: { off_track: boolean; pit: boolean; reset: boolean; partial: boolean };
+  context: {
+    key: string;
+    track_id: number;
+    track_name: string;
+    track_config: string;
+    car_name: string;
+    session_type: string;
   } | null;
-  deltas: Record<"night" | "pb" | "record", DeltaRef | null> | null;
+  car: { on_track: boolean; on_pit_road: boolean } | null;
   events: LiveEvent[];
 }
 
