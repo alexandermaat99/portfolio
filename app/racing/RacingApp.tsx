@@ -299,7 +299,7 @@ function LiveView({
           <span>{trackTitle(title)} · any car</span>
         </div>
       )}
-      <StandingsTable rows={rows} current={isLive ? live?.current_driver_id : null} showLast={boardMode === "tonight"} />
+      <StandingsTable rows={rows} current={isLive && live?.car?.on_track ? live.current_driver_id : null} showLast={boardMode === "tonight"} />
       {others.length > 0 && (
         <div style={{ marginTop: 14 }}>
           <div className={`${s.small} ${s.muted}`} style={{ marginBottom: 8 }}>Also driven</div>
