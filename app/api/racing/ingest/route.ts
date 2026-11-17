@@ -2,7 +2,7 @@
 // The sim PC POSTs SimStats snapshots here. Protected by a shared secret.
 
 import { timingSafeEqual } from "crypto";
-import { saveSnapshot, type SnapshotKind } from "../../../racing/lib/store";
+import { savePhoto, saveSnapshot, type SnapshotKind } from "../../../racing/lib/store";
 
 export const dynamic = "force-dynamic";
 
@@ -32,6 +32,7 @@ export async function POST(req: Request) {
     return Response.json({ error: "Invalid JSON" }, { status: 400 });
   }
   const kind = parsed.kind;
+  if (kind === "photo") return ingestPhoto(parsed.payload);
   if ((kind !== "live" && kind !== "data") || typeof parsed.payload !== "object" || !parsed.payload) {
     return Response.json({ error: "Expected {kind: 'live'|'data', payload: {...}}" }, { status: 400 });
   }
@@ -40,6 +41,28 @@ export async function POST(req: Request) {
   } catch (e) {
     console.error("racing ingest failed", e);
     // Caller is authenticated (the sim PC), so it's fine to say why.
+    const reason = e instanceof Error ? e.message : String(e);
+    return Response.json({ error: "Storage unavailable", reason }, { status: 503 });
+  }
+  return Response.json({ ok: true });
+}
+
+async function ingestPhoto(payload: unknown) {
+  const p = payload as { driver_id?: unknown; hash?: unknown; data?: unknown } | null;
+  if (
+    !p ||
+    !Number.isInteger(p.driver_id) ||
+    typeof p.hash !== "string" ||
+    !/^[0-9a-f]{6,40}$/.test(p.hash) ||
+    typeof p.data !== "string" ||
+    !p.data.startsWith("/9j/") // base64 of a JPEG's FF D8 FF header
+  ) {
+    return Response.json({ error: "Expected {driver_id, hash, data: base64 JPEG}" }, { status: 400 });
+  }
+  try {
+    await savePhoto(p.driver_id as number, p.hash, p.data);
+  } catch (e) {
+    console.error("racing photo ingest failed", e);
     const reason = e instanceof Error ? e.message : String(e);
     return Response.json({ error: "Storage unavailable", reason }, { status: 503 });
   }

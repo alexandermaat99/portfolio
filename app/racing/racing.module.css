@@ -162,3 +162,37 @@
   .comboInfo { grid-template-columns: 1.4fr 1fr 1.4fr; gap: 16px; align-items: start; }
   .comboInfo > div { grid-template-columns: 1fr; gap: 2px; }
 }
+
+/* driver photos, car-maker logos, track outlines */
+.avatar {
+  --size: 28px;
+  width: var(--size); height: var(--size); flex: none; border-radius: 50%; object-fit: cover;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--c, var(--card2)); color: #0b0d12; font-weight: 800; font-size: calc(var(--size) * 0.4);
+  box-shadow: 0 0 0 2px var(--card), 0 0 0 3px var(--c, var(--border));
+}
+.avatar_xs { --size: 20px; margin-right: 8px; }
+.avatar_sm { --size: 26px; }
+.avatar_md { --size: 36px; }
+.avatar_lg { --size: 44px; }
+.driverName { display: flex; align-items: center; gap: 12px; }
+.nameInner { gap: 10px; }
+.who { display: inline-flex; align-items: center; }
+.toast { gap: 12px; }
+
+.brandLogo {
+  display: inline-block; width: 1.05em; height: 1.05em; margin-right: 0.4em; vertical-align: -0.15em; flex: none;
+  background: currentColor; opacity: 0.85;
+  -webkit-mask: var(--logo) center / contain no-repeat; mask: var(--logo) center / contain no-repeat;
+}
+.carLabel { display: inline-flex; align-items: center; }
+.carItem { display: inline-flex; align-items: center; margin-right: 12px; }
+.bestCar { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 11em; }
+.comboInfo dd { display: flex; align-items: center; }
+.comboSub { display: flex; align-items: center; flex-wrap: wrap; }
+
+.trackMap { width: 1.6em; height: 1.6em; margin-right: 0.5em; flex: none; }
+.trackMap path { fill: none; stroke: currentColor; stroke-width: 7; stroke-linejoin: round; opacity: 0.9; }
+.trackMapLg { width: 2.6em; height: 2.6em; color: var(--accent); }
+.titleRow { display: flex; align-items: center; gap: 4px; }
+.boardSub { flex-wrap: nowrap; }
