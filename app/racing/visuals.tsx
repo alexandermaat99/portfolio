@@ -87,7 +87,7 @@ export function Avatar({
   size = "sm",
 }: {
   driver: { id?: number; name: string; nickname?: string | null; color: string; photo?: string | null } | null | undefined;
-  size?: "xs" | "sm" | "md" | "lg";
+  size?: "xs" | "sm" | "md" | "lg" | "xl";
 }) {
   const cls = `${s.avatar} ${s[`avatar_${size}`]}`;
   const style = { "--c": driver?.color ?? "var(--border)" } as CSSProperties;

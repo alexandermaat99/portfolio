@@ -71,10 +71,32 @@ export interface Night {
   combos: ComboStandings[];
 }
 
+export interface DriverProfile {
+  id: number;
+  stats: {
+    laps: number;
+    clean_laps: number;
+    clean_pct: number | null;
+    seconds: number;
+    incidents: number;
+    nights: number;
+    tracks: number;
+    records: number;
+    night_wins: number;
+    clean_streak: number;
+    first_at: number | null;
+    last_at: number | null;
+    favorite_car: { name: string; laps: number } | null;
+    favorite_track: { track_id: number; track_name: string; track_config: string; laps: number } | null;
+  };
+  badges: { key: string; label: string; tier: "record" | "gold" | "good" | "bad" | "plain" }[];
+}
+
 export interface RacingData {
   updated_at: number;
   local_url: string | null; // the full app on the home network
   track_maps?: Record<string, string>; // track key -> SVG path of the outline (0-100 box)
+  driver_stats?: DriverProfile[];
   drivers: Driver[];
   session_id: number | null;
   tonight: ComboStandings[];
