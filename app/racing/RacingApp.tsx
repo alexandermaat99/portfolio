@@ -122,7 +122,8 @@ export default function RacingApp({ initial }: { initial: RacingSnapshot }) {
       <header className={s.topbar}>
         <div className={s.brand}>
           <a href="/racing">
-            Sim<span>Stats</span>
+            <span className={s.wordmark}>SIMSTATS</span>
+            <span className={s.model}>SS-1</span>
           </a>
           <Link href="/" className={s.back}>
             by Alex Maat
@@ -153,8 +154,9 @@ export default function RacingApp({ initial }: { initial: RacingSnapshot }) {
         )}
 
         <nav className={s.tabs} aria-label="Views">
-          {(["live", "records", "nights"] as Tab[]).map((t) => (
+          {(["live", "records", "nights"] as Tab[]).map((t, i) => (
             <button key={t} className={`${s.tab} ${tab === t ? s.tabOn : ""}`} onClick={() => setTab(t)}>
+              <span className={s.k}>0{i + 1}</span>
               {t === "live" ? (tonightActive || isLive ? "Tonight" : "Latest") : t === "records" ? "Records" : "Nights"}
             </button>
           ))}
