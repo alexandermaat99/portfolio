@@ -5,6 +5,7 @@
 import Link from "next/link";
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type CSSProperties } from "react";
 import s from "./racing.module.css";
+import { LAP_RIPPLES, startDotField, type DotField } from "./dots";
 import { Avatar, BrandLogo, CarLabel, DriverName, nick, TrackIcon, TrackMapsContext } from "./visuals";
 import type { Combo, ComboStandings, Driver, Lap, LiveEvent, Night, RacingSnapshot, Standing } from "./lib/types";
 
@@ -57,6 +58,17 @@ export default function RacingApp({ initial }: { initial: RacingSnapshot }) {
   const [toasts, setToasts] = useState<LiveEvent[]>([]);
   const lastEvent = useRef<number | null>(null);
 
+  // Animated dot grid (static CSS grid if the visitor prefers reduced motion).
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const dots = useRef<DotField | null>(null);
+  const [dotsLive, setDotsLive] = useState(false);
+  useEffect(() => {
+    if (!canvasRef.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    dots.current = startDotField(canvasRef.current);
+    setDotsLive(true);
+    return () => dots.current?.stop();
+  }, []);
+
   const { live, data } = snap;
   const isLive = !!live && live.connected && snap.now - live.updated_at < LIVE_WINDOW;
 
@@ -93,6 +105,11 @@ export default function RacingApp({ initial }: { initial: RacingSnapshot }) {
     lastEvent.current = maxId;
     if (!fresh.length) return;
     setToasts((t) => [...t, ...fresh]);
+    // New laps ripple out from the "now driving" card.
+    const card = document.getElementById("racing-now")?.getBoundingClientRect();
+    const x = card && card.width ? card.left + card.width / 2 : window.innerWidth / 2;
+    const y = card && card.height ? card.top + card.height / 2 : window.innerHeight / 3;
+    for (const e of fresh) dots.current?.ripple(x, y, LAP_RIPPLES[e.type] ?? LAP_RIPPLES.lap);
     const ids = new Set(fresh.map((e) => e.id));
     setTimeout(() => setToasts((t) => t.filter((e) => !ids.has(e.id))), 7000);
   }, [live?.events]);
@@ -118,7 +135,8 @@ export default function RacingApp({ initial }: { initial: RacingSnapshot }) {
   return (
     <TrackMapsContext.Provider value={data?.track_maps ?? {}}>
     <DriversContext.Provider value={data?.drivers ?? []}>
-    <div className={s.root}>
+    <div className={`${s.root} ${dotsLive ? s.dotsLive : ""}`}>
+      <canvas ref={canvasRef} className={s.dotCanvas} aria-hidden />
       <header className={s.topbar}>
         <div className={s.brand}>
           <a href="/racing">
@@ -251,7 +269,7 @@ function LiveView({
   }
 
   const nowCard = (
-    <section className={`${s.card} ${s.now}`} style={{ "--driver": driver?.color ?? "var(--border)" } as CSSProperties}>
+    <section id="racing-now" className={`${s.card} ${s.now}`} style={{ "--driver": driver?.color ?? "var(--border)" } as CSSProperties}>
       <div className={s.nowTop}>
         <div>
           <div className={`${s.small} ${s.muted}`}>{isLive ? "NOW DRIVING" : tonightActive ? "TONIGHT" : "LATEST"}</div>

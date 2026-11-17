@@ -5,7 +5,7 @@
 .root {
   --chassis: #0a0a0a;
   --grid-dot: rgba(255, 255, 255, 0.11);
-  --panel: #121212;
+  --panel: rgba(18, 18, 18, 0.86); /* ripples glow faintly through */
   --panel2: #1b1b1a;
   --ink: #ececE6;
   --line: #3a3a37;
@@ -185,7 +185,7 @@
   width: var(--size); height: var(--size); flex: none; border-radius: 50%; object-fit: cover;
   display: inline-flex; align-items: center; justify-content: center;
   background: var(--c, var(--panel2)); color: #111; font-family: var(--mono); font-weight: 700; font-size: calc(var(--size) * 0.36);
-  box-shadow: 0 0 0 2px var(--panel), 0 0 0 3px var(--ink);
+  box-shadow: 0 0 0 2px #121212, 0 0 0 3px var(--ink);
 }
 .avatar_xs { --size: 20px; margin-right: 8px; }
 .avatar_sm { --size: 26px; }
@@ -230,3 +230,10 @@
 @media (max-width: 520px) {
   .brand > .back { display: none; } /* also in the intro + footer */
 }
+
+/* animated dot grid (dots.ts) replaces the static one */
+.root { position: relative; isolation: isolate; }
+.dotCanvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+.dotsLive { background-image: none; }
+.topbar { background: #0a0a0a; }
+.tabs { background: #121212; }
