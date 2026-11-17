@@ -29,15 +29,15 @@ export default function PatternsPlace() {
       </ButtonLink>
 
       <ProjectImage
-        src="/images/Pattern's Place Login.png"
-        alt="The Pattern's Place sign-in screen"
+        src="/images/patterns-place-home.png"
+        alt="The Pattern's Place homepage: indie sewing patterns, straight from the designers"
         width={3024}
         height={1964}
         className="mt-2"
       />
       <ProjectImage
-        src="/images/Pattern's Place Proto.png"
-        alt="The Pattern's Place marketplace prototype"
+        src="/images/patterns-place-product.png"
+        alt="A sewing pattern listing on The Pattern's Place, with photos, tags and a download button"
         width={3024}
         height={1964}
       />
