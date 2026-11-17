@@ -1,38 +1,20 @@
-// app/racing/dots.ts: animated dot-grid background (same as the SimStats app).
-// A slight wave sweeps across every so often; coloured ripples for new laps; confetti for
-// a new fastest lap. Idle frames aren't redrawn.
+// app/racing/dots.ts: animated dot-grid background ("wind field"), same as the SimStats app.
+// Every grid point follows a drifting field of layered sine waves: calm = dot, gusty = a short
+// dash pointing with the wind. New laps make the field gust (tinted); confetti for a new
+// fastest lap. Drawn at 30fps in a handful of batched paths.
 
 const SPACING = 18;
-const BASE_ALPHA = 0.11;
-const SPEED = 420; // px/s
-const WIDTH = 70; // ring thickness, px
-const WAVE_SPEED = 260;
-const WAVE_WIDTH = 140;
-const WAVE_EVERY: [number, number] = [9000, 16000];
+const FPS = 30;
+const BUCKETS = 8;
 
-export interface RippleOptions {
+export interface GustOptions {
   color?: string;
   strength?: number;
-  rings?: number;
-}
-
-interface Ripple {
-  kind: "ripple" | "wave";
-  x: number;
-  y: number;
-  dx?: number;
-  dy?: number;
-  from?: number;
-  speed: number;
-  width: number;
-  start: number;
-  strength: number;
-  rgb: [number, number, number];
-  life: number;
+  duration?: number;
 }
 
 export interface DotField {
-  ripple(x: number, y: number, opts?: RippleOptions): void;
+  gust(opts?: GustOptions): void;
   confetti(): void;
   stop(): void;
 }
@@ -42,108 +24,87 @@ const hexToRgb = (hex: string): [number, number, number] => {
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
 };
 
+// Layered sine "noise": wind direction and strength at (x, y, t).
+function field(x: number, y: number, t: number): [number, number] {
+  const angle =
+    Math.sin(x * 0.0061 + t * 0.21) +
+    Math.sin(y * 0.0083 - t * 0.17) +
+    0.6 * Math.sin((x + y) * 0.0042 + t * 0.11) +
+    0.4 * Math.sin((x - y) * 0.011 - t * 0.29);
+  const g = Math.sin(x * 0.0035 - y * 0.0021 + t * 0.35) * 0.6 + Math.sin(x * 0.0018 + y * 0.0047 - t * 0.23) * 0.4;
+  return [angle * 1.3, Math.max(0, g) ** 2];
+}
+
 export function startDotField(canvas: HTMLCanvasElement): DotField {
   const ctx = canvas.getContext("2d")!;
-  const ripples: Ripple[] = [];
   let w = 0;
   let h = 0;
-  let dirty = true;
+  let dpr = 1;
   let raf = 0;
-  let ambientTimer: ReturnType<typeof setTimeout> | undefined;
+  let last = 0;
+  let gust: { start: number; dur: number; amp: number; rgb: [number, number, number] } | null = null;
 
   const resize = () => {
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
     w = window.innerWidth;
     h = window.innerHeight;
     canvas.width = Math.round(w * dpr);
     canvas.height = Math.round(h * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    dirty = true;
-  };
-
-  const ripple = (x: number, y: number, opts: RippleOptions = {}) => {
-    const start = performance.now();
-    for (let i = 0; i < (opts.rings ?? 1); i++) {
-      ripples.push({
-        kind: "ripple",
-        speed: SPEED,
-        width: WIDTH,
-        x,
-        y,
-        start: start + i * 260,
-        strength: opts.strength ?? 1,
-        rgb: opts.color ? hexToRgb(opts.color) : [255, 255, 255],
-        life: (Math.hypot(w, h) / SPEED) * 1000 + 400,
-      });
-    }
-    if (ripples.length > 12) ripples.splice(0, ripples.length - 12);
   };
 
   const draw = (now: number) => {
-    for (let i = ripples.length - 1; i >= 0; i--) if (now - ripples[i].start > ripples[i].life) ripples.splice(i, 1);
-    const active = ripples.filter((r) => now >= r.start);
-    if (!active.length && !dirty) return;
-    dirty = active.length > 0;
+    const t = now / 1000;
+    let boost = 0;
+    let tint: [number, number, number] | null = null;
+    if (gust) {
+      const p = (now - gust.start) / gust.dur;
+      if (p >= 1) gust = null;
+      else {
+        boost = Math.sin(Math.PI * p) * gust.amp;
+        tint = gust.rgb;
+      }
+    }
     ctx.clearRect(0, 0, w, h);
+    ctx.lineCap = "round";
+    ctx.lineWidth = 1.6;
+    const paths = Array.from({ length: BUCKETS }, () => new Path2D());
+    const tinted = Array.from({ length: BUCKETS }, () => new Path2D());
     const cols = Math.ceil(w / SPACING) + 1;
     const rows = Math.ceil(h / SPACING) + 1;
     const off = SPACING / 2;
-    ctx.fillStyle = `rgba(255,255,255,${BASE_ALPHA})`;
-    const lit: number[] = [];
     for (let j = 0; j < rows; j++) {
       const y = off + j * SPACING;
       for (let i = 0; i < cols; i++) {
         const x = off + i * SPACING;
-        let k = 0;
-        let rgb: [number, number, number] = [255, 255, 255];
-        for (const rp of active) {
-          const pos =
-            rp.kind === "wave" ? x * rp.dx! + y * rp.dy! - rp.from! : Math.hypot(x - rp.x, y - rp.y);
-          const diff = Math.abs(pos - ((now - rp.start) / 1000) * rp.speed);
-          if (diff < rp.width) {
-            const fade = rp.kind === "wave" ? 1 : Math.max(0, 1 - (now - rp.start) / rp.life);
-            const kk = (1 - diff / rp.width) ** 2 * rp.strength * fade;
-            if (kk > k) {
-              k = kk;
-              rgb = rp.rgb;
-            }
-          }
-        }
-        if (k > 0.02) lit.push(x, y, k, ...rgb);
-        else ctx.fillRect(x - 1, y - 1, 2, 2);
+        const [a, s0] = field(x, y, t);
+        const s = Math.min(1, s0 + boost * (0.08 + s0 * 0.7));
+        const len = 0.4 + s * 7;
+        const dx = (Math.cos(a) * len) / 2;
+        const dy = (Math.sin(a) * len) / 2;
+        const b = Math.min(BUCKETS - 1, Math.floor(s * BUCKETS));
+        const path = tint && s > 0.45 ? tinted[b] : paths[b];
+        path.moveTo(x - dx, y - dy);
+        path.lineTo(x + dx, y + dy);
       }
     }
-    for (let n = 0; n < lit.length; n += 6) {
-      const size = 2 + lit[n + 2] * 2.6;
-      ctx.fillStyle = `rgba(${lit[n + 3]},${lit[n + 4]},${lit[n + 5]},${Math.min(1, BASE_ALPHA + lit[n + 2] * 0.85)})`;
-      ctx.fillRect(lit[n] - size / 2, lit[n + 1] - size / 2, size, size);
+    for (let b = 0; b < BUCKETS; b++) {
+      const alpha = 0.1 + (b / (BUCKETS - 1)) * 0.38;
+      ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
+      ctx.stroke(paths[b]);
+      if (tint) {
+        ctx.strokeStyle = `rgba(${tint[0]},${tint[1]},${tint[2]},${Math.min(1, alpha + 0.25)})`;
+        ctx.stroke(tinted[b]);
+      }
     }
   };
 
   const frame = (now: number) => {
-    draw(now);
+    if (document.visibilityState === "visible" && now - last >= 1000 / FPS) {
+      last = now;
+      draw(now);
+    }
     raf = requestAnimationFrame(frame);
-  };
-
-  // A straight wave front crossing the whole screen at a random angle.
-  const wave = () => {
-    const angle = Math.random() * Math.PI * 2;
-    const dx = Math.cos(angle);
-    const dy = Math.sin(angle);
-    const proj = [0, w * dx, h * dy, w * dx + h * dy];
-    const from = Math.min(...proj) - WAVE_WIDTH;
-    const to = Math.max(...proj) + WAVE_WIDTH;
-    ripples.push({
-      kind: "wave", x: 0, y: 0, dx, dy, from, speed: WAVE_SPEED, width: WAVE_WIDTH,
-      start: performance.now(), strength: 0.32, rgb: [255, 255, 255], life: ((to - from) / WAVE_SPEED) * 1000,
-    });
-  };
-  const scheduleWave = () => {
-    const delay = WAVE_EVERY[0] + Math.random() * (WAVE_EVERY[1] - WAVE_EVERY[0]);
-    ambientTimer = setTimeout(() => {
-      if (document.visibilityState === "visible") wave();
-      scheduleWave();
-    }, delay);
   };
 
   // Confetti from both bottom corners, on its own canvas above everything.
@@ -157,7 +118,6 @@ export function startDotField(canvas: HTMLCanvasElement): DotField {
       Object.assign(confettiCanvas.style, { position: "fixed", inset: "0", width: "100%", height: "100%", zIndex: "40", pointerEvents: "none" });
       document.body.appendChild(confettiCanvas);
     }
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
     confettiCanvas.width = Math.round(w * dpr);
     confettiCanvas.height = Math.round(h * dpr);
     const cctx = confettiCanvas.getContext("2d")!;
@@ -205,25 +165,25 @@ export function startDotField(canvas: HTMLCanvasElement): DotField {
   resize();
   window.addEventListener("resize", resize);
   raf = requestAnimationFrame(frame);
-  scheduleWave();
 
   return {
-    ripple,
+    gust(opts = {}) {
+      gust = { start: performance.now(), dur: opts.duration ?? 2600, amp: opts.strength ?? 1, rgb: hexToRgb(opts.color ?? "#ff4f00") };
+    },
     confetti,
     stop() {
       cancelAnimationFrame(raf);
       cancelAnimationFrame(confettiRaf);
-      clearTimeout(ambientTimer);
       window.removeEventListener("resize", resize);
       confettiCanvas?.remove();
     },
   };
 }
 
-/** Ripple style for each kind of lap event. */
-export const LAP_RIPPLES: Record<string, RippleOptions> = {
-  lap: { color: "#ff4f00", strength: 0.9 },
-  pb: { color: "#22c06e", strength: 1.1, rings: 2 },
-  night_best: { color: "#ff4f00", strength: 1.2, rings: 2 },
-  record: { color: "#8f72ff", strength: 1.4, rings: 3 },
+/** Gust style for each kind of lap event. */
+export const LAP_GUSTS: Record<string, GustOptions> = {
+  lap: { color: "#ff4f00", strength: 0.5 },
+  pb: { color: "#22c06e", strength: 0.75 },
+  night_best: { color: "#ff4f00", strength: 0.9 },
+  record: { color: "#8f72ff", strength: 1, duration: 3600 },
 };

@@ -269,3 +269,22 @@
 /* big nicknames shrink on narrow phones instead of breaking mid-word */
 .driverName { font-size: clamp(1.5rem, 8vw, 2.1rem); overflow-wrap: normal; word-break: keep-all; }
 .dname > span:first-child { overflow-wrap: normal; word-break: keep-all; }
+
+/* drivers: compact list, tap a row for the full profile */
+.driverList { list-style: none; margin: 0; padding: 0; }
+.dlItem { border-top: 1px solid var(--hair); }
+.dlItem:first-child { border-top: 0; }
+.dlRow { width: 100%; display: flex; align-items: center; gap: 12px; padding: 10px 0; background: none; border: 0; color: inherit; text-align: left; cursor: pointer; font: inherit; }
+.dlRow .avatar { box-shadow: 0 0 0 2px #121212, 0 0 0 3px var(--c); }
+.dlName { flex: 1; min-width: 0; font-weight: 600; font-size: 1.05rem; }
+.dlMeta { display: inline-flex; align-items: center; font-size: 0.72rem; color: var(--muted); white-space: nowrap; }
+.dlRec { margin-left: 8px; padding: 1px 5px; border-radius: 2px; background: var(--record); color: #fff; font-size: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase; }
+.dlPips { display: inline-flex; gap: 3px; }
+.pip { width: 7px; height: 7px; border-radius: 1px; background: var(--line); }
+.pipRecord { background: var(--record); }
+.pipGold { background: var(--accent); }
+.pipGood { background: var(--pb); }
+.pipBad { background: var(--bad); }
+.dlChev { width: 1.2em; text-align: center; font-family: var(--mono); color: var(--muted); }
+.profileDetail { padding: 2px 0 16px; }
+@media (max-width: 420px) { .dlPips { display: none; } }

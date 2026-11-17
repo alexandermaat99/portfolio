@@ -5,7 +5,7 @@
 import Link from "next/link";
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type CSSProperties } from "react";
 import s from "./racing.module.css";
-import { LAP_RIPPLES, startDotField, type DotField } from "./dots";
+import { LAP_GUSTS, startDotField, type DotField } from "./dots";
 import { Avatar, BrandLogo, CarLabel, DriverName, nick, TrackIcon, TrackMapsContext } from "./visuals";
 import type { Combo, ComboStandings, Driver, Lap, LiveEvent, Night, RacingSnapshot, Standing } from "./lib/types";
 
@@ -110,11 +110,10 @@ export default function RacingApp({ initial }: { initial: RacingSnapshot }) {
     lastEvent.current = maxId;
     if (!fresh.length) return;
     setToasts((t) => [...t, ...fresh]);
-    // New laps ripple out from the "now driving" card.
-    const card = document.getElementById("racing-now")?.getBoundingClientRect();
-    const x = card && card.width ? card.left + card.width / 2 : window.innerWidth / 2;
-    const y = card && card.height ? card.top + card.height / 2 : window.innerHeight / 3;
-    for (const e of fresh) dots.current?.ripple(x, y, LAP_RIPPLES[e.type] ?? LAP_RIPPLES.lap);
+    // New laps make the dot field gust, tinted by the best kind of lap in this batch.
+    const order = ["record", "night_best", "pb", "lap"];
+    const top = order.find((k) => fresh.some((e) => e.type === k)) ?? "lap";
+    dots.current?.gust(LAP_GUSTS[top]);
     // Confetti for a new fastest lap (of the night, or ever).
     if (fresh.some((e) => e.type === "night_best" || e.type === "record")) dots.current?.confetti();
     const ids = new Set(fresh.map((e) => e.id));
@@ -278,7 +277,7 @@ function LiveView({
   }
 
   const nowCard = (
-    <section id="racing-now" className={`${s.card} ${s.now}`} style={{ "--driver": driver?.color ?? "var(--border)" } as CSSProperties}>
+    <section className={`${s.card} ${s.now}`} style={{ "--driver": driver?.color ?? "var(--border)" } as CSSProperties}>
       <div className={s.nowTop}>
         <div>
           <div className={`${s.small} ${s.muted}`}>{isLive ? "NOW DRIVING" : tonightActive ? "TONIGHT" : "LATEST"}</div>
@@ -516,76 +515,103 @@ const fmtDuration = (sec: number) => {
 };
 
 function DriversView({ data }: { data: NonNullable<RacingSnapshot["data"]> }) {
+  const [open, setOpen] = useState<number | null>(null);
   const profiles = (data.driver_stats ?? [])
     .map((p) => ({ ...p, driver: data.drivers.find((d) => d.id === p.id) }))
-    .filter((p) => p.driver && p.stats.laps > 0);
+    .filter((p) => p.driver && p.stats.laps > 0)
+    .sort((a, b) => b.stats.records - a.stats.records || b.stats.night_wins - a.stats.night_wins || b.stats.laps - a.stats.laps);
   if (!profiles.length) return <div className={`${s.card} ${s.empty}`}>No drivers yet.</div>;
   const badgeClass = { record: s.badgeRecord, gold: s.badgeGold, good: s.badgeGood, bad: s.badgeBad, plain: "" };
+  const pipClass = { record: s.pipRecord, gold: s.pipGold, good: s.pipGood, bad: s.pipBad, plain: "" };
   return (
-    <div className={s.profilesGrid}>
-      {profiles.map(({ driver, stats: st, badges, id }) => (
-        <section key={id} className={`${s.card} ${s.profile}`} style={colorVar(driver!.color)}>
-          <div className={s.profileHead}>
-            <Avatar driver={driver} size="xl" />
-            <div style={{ minWidth: 0 }}>
-              <DriverName driver={driver!} size="lg" />
-              <div className={s.profileSub}>
-                First lap {st.first_at ? fmtDay(st.first_at) : "—"} · last raced {st.last_at ? fmtDay(st.last_at) : "—"}
-              </div>
-            </div>
-          </div>
-          {badges.length > 0 && (
-            <div className={s.badges}>
-              {badges.map((b) => (
-                <span key={b.key} className={`${s.badge} ${badgeClass[b.tier]}`}>{b.label}</span>
-              ))}
-            </div>
-          )}
-          <div className={s.statGrid}>
-            {[
-              ["Laps", st.laps],
-              ["Clean", st.clean_pct == null ? "—" : `${Math.round(st.clean_pct * 100)}%`],
-              ["Nights", st.nights],
-              ["Tracks", st.tracks],
-              ["Records", st.records],
-              ["Night wins", st.night_wins],
-              ["Driven", fmtDuration(st.seconds)],
-              ["Streak", st.clean_streak],
-            ].map(([label, value]) => (
-              <div key={label} className={s.stat}>
-                <div className={`${s.statV} ${s.num}`}>{value}</div>
-                <div className={s.statL}>{label}</div>
-              </div>
-            ))}
-          </div>
-          <dl className={s.favs}>
-            <div>
-              <dt>Favorite car</dt>
-              <dd>
-                {st.favorite_car ? (
-                  <>
-                    <CarLabel car={st.favorite_car.name} />
-                    <span className={s.favN}>{st.favorite_car.laps} laps</span>
-                  </>
-                ) : "—"}
-              </dd>
-            </div>
-            <div>
-              <dt>Favorite track</dt>
-              <dd>
-                {st.favorite_track ? (
-                  <>
-                    <TrackIcon trackKey={`${st.favorite_track.track_id}|${st.favorite_track.track_config}`} />
-                    {trackTitle(st.favorite_track)}
-                    <span className={s.favN}>{st.favorite_track.laps} laps</span>
-                  </>
-                ) : "—"}
-              </dd>
-            </div>
-          </dl>
-        </section>
-      ))}
-    </div>
+    <section className={s.card}>
+      <h2 className={s.cardTitle}>
+        <span>Drivers</span>
+        <span className={s.muted}>{profiles.length}</span>
+      </h2>
+      <ul className={s.driverList}>
+        {profiles.map(({ driver, stats: st, badges, id }) => {
+          const isOpen = open === id;
+          return (
+            <li key={id} className={s.dlItem} style={colorVar(driver!.color)}>
+              <button className={s.dlRow} onClick={() => setOpen(isOpen ? null : id)} aria-expanded={isOpen}>
+                <Avatar driver={driver} size="md" />
+                <span className={s.dlName}>
+                  <DriverName driver={driver!} />
+                </span>
+                <span className={`${s.dlMeta} ${s.num}`}>
+                  {st.favorite_car && <BrandLogo car={st.favorite_car.name} />}
+                  {st.laps} laps
+                  {st.records > 0 && <span className={s.dlRec}>{st.records} rec</span>}
+                </span>
+                <span className={s.dlPips}>
+                  {badges.slice(0, 5).map((b) => (
+                    <i key={b.key} className={`${s.pip} ${pipClass[b.tier]}`} title={b.label} />
+                  ))}
+                </span>
+                <span className={s.dlChev}>{isOpen ? "−" : "+"}</span>
+              </button>
+              {isOpen && (
+                <div className={s.profileDetail}>
+                  <div className={s.profileSub}>
+                    First lap {st.first_at ? fmtDay(st.first_at) : "—"} · last raced {st.last_at ? fmtDay(st.last_at) : "—"}
+                  </div>
+                  {badges.length > 0 && (
+                    <div className={s.badges}>
+                      {badges.map((b) => (
+                        <span key={b.key} className={`${s.badge} ${badgeClass[b.tier]}`}>{b.label}</span>
+                      ))}
+                    </div>
+                  )}
+                  <div className={s.statGrid}>
+                    {[
+                      ["Laps", st.laps],
+                      ["Clean", st.clean_pct == null ? "—" : `${Math.round(st.clean_pct * 100)}%`],
+                      ["Nights", st.nights],
+                      ["Tracks", st.tracks],
+                      ["Records", st.records],
+                      ["Night wins", st.night_wins],
+                      ["Driven", fmtDuration(st.seconds)],
+                      ["Streak", st.clean_streak],
+                    ].map(([label, value]) => (
+                      <div key={label} className={s.stat}>
+                        <div className={`${s.statV} ${s.num}`}>{value}</div>
+                        <div className={s.statL}>{label}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <dl className={s.favs}>
+                    <div>
+                      <dt>Favorite car</dt>
+                      <dd>
+                        {st.favorite_car ? (
+                          <>
+                            <CarLabel car={st.favorite_car.name} />
+                            <span className={s.favN}>{st.favorite_car.laps} laps</span>
+                          </>
+                        ) : "—"}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Favorite track</dt>
+                      <dd>
+                        {st.favorite_track ? (
+                          <>
+                            <TrackIcon trackKey={`${st.favorite_track.track_id}|${st.favorite_track.track_config}`} />
+                            {trackTitle(st.favorite_track)}
+                            <span className={s.favN}>{st.favorite_track.laps} laps</span>
+                          </>
+                        ) : "—"}
+                      </dd>
+                    </div>
+                  </dl>
+                </div>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </section>
   );
 }
 
