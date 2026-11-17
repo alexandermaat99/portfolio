@@ -25,10 +25,10 @@ export default function SimStats() {
         when you&apos;re not in the room.
       </p>
       <ProjectImage
-        src="/images/simstats-tv.png"
+        src="/images/simstats-tv-2026.png"
         alt="SimStats TV view showing the current driver, lap timer, live delta and leaderboards"
-        width={1920}
-        height={1080}
+        width={3840}
+        height={2160}
         caption="The big-screen view we put on the TV during race nights."
       />
       <ButtonLink href="/racing">See the live leaderboard</ButtonLink>
