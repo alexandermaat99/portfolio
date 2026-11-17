@@ -7,10 +7,29 @@ import type { RacingData, RacingLive, RacingSnapshot } from "./types";
 const KEYS = { live: "racing:live", data: "racing:data" } as const;
 export type SnapshotKind = keyof typeof KEYS;
 
+// Upstash via the Vercel Marketplace names its variables KV_REST_API_URL / _TOKEN or
+// UPSTASH_REDIS_REST_URL / _TOKEN, optionally with a custom prefix, so match by suffix.
+const URL_SUFFIXES = ["KV_REST_API_URL", "UPSTASH_REDIS_REST_URL", "REDIS_REST_URL"];
+const TOKEN_SUFFIXES = ["KV_REST_API_TOKEN", "UPSTASH_REDIS_REST_TOKEN", "REDIS_REST_TOKEN"];
+
+function findEnv(suffixes: string[]): string | undefined {
+  for (const suffix of suffixes) {
+    if (process.env[suffix]) return process.env[suffix];
+    const key = Object.keys(process.env).find((k) => k.endsWith(suffix) && !k.includes("READ_ONLY"));
+    if (key && process.env[key]) return process.env[key];
+  }
+  return undefined;
+}
+
 function redisConfig() {
-  const url = process.env.KV_REST_API_URL ?? process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.KV_REST_API_TOKEN ?? process.env.UPSTASH_REDIS_REST_TOKEN;
+  const url = findEnv(URL_SUFFIXES);
+  const token = findEnv(TOKEN_SUFFIXES);
   return url && token ? { url, token } : null;
+}
+
+/** Names (never values) of storage-looking env vars, to explain misconfiguration. */
+export function storageEnvNames(): string[] {
+  return Object.keys(process.env).filter((k) => /KV_|UPSTASH|REDIS/.test(k)).sort();
 }
 
 async function redis(command: (string | number)[]): Promise<unknown> {
@@ -22,7 +41,7 @@ async function redis(command: (string | number)[]): Promise<unknown> {
     body: JSON.stringify(command),
     cache: "no-store",
   });
-  if (!res.ok) throw new Error(`Redis error ${res.status}`);
+  if (!res.ok) throw new Error(`Redis responded ${res.status}`);
   const json = (await res.json()) as { result?: unknown; error?: string };
   if (json.error) throw new Error(json.error);
   return json.result;
@@ -38,7 +57,7 @@ export function storageConfigured(): boolean {
 export async function saveSnapshot(kind: SnapshotKind, json: string): Promise<void> {
   if (redisConfig()) await redis(["SET", KEYS[kind], json]);
   else if (process.env.NODE_ENV !== "production") memory.set(KEYS[kind], json);
-  else throw new Error("Storage not configured");
+  else throw new Error(`Storage not configured (storage env vars found: ${storageEnvNames().join(", ") || "none"})`);
 }
 
 export async function loadSnapshot(): Promise<RacingSnapshot> {
