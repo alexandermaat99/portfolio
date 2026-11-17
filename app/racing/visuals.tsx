@@ -61,13 +61,32 @@ export function TrackIcon({ trackKey, large = false }: { trackKey: string | null
   );
 }
 
+// -- driver names: nickname big, real name small underneath --------------------------
+
+type Named = { name: string; nickname?: string | null };
+export const nick = (d: Named | null | undefined) => (d ? d.nickname || d.name : "");
+
+export function DriverName({ driver, size = "md", inline = false }: {
+  driver: Named;
+  size?: "md" | "lg";
+  inline?: boolean;
+}) {
+  const real = driver.nickname ? driver.name : null;
+  return (
+    <span className={`${s.dname} ${size === "lg" ? s.dnameLg : ""} ${inline ? s.dnameInline : ""}`}>
+      <span>{nick(driver)}</span>
+      {real && <span className={s.realname}>{real}</span>}
+    </span>
+  );
+}
+
 // -- driver photos ------------------------------------------------------------------
 
 export function Avatar({
   driver,
   size = "sm",
 }: {
-  driver: { id?: number; name: string; color: string; photo?: string | null } | null | undefined;
+  driver: { id?: number; name: string; nickname?: string | null; color: string; photo?: string | null } | null | undefined;
   size?: "xs" | "sm" | "md" | "lg";
 }) {
   const cls = `${s.avatar} ${s[`avatar_${size}`]}`;
@@ -77,7 +96,7 @@ export function Avatar({
     // eslint-disable-next-line @next/next/no-img-element -- tiny, already-optimized JPEGs
     return <img className={cls} style={style} src={`/api/racing/photo/${driver.id}?v=${driver.photo}`} alt="" />;
   }
-  const initials = driver.name
+  const initials = nick(driver)
     .split(/\s+/)
     .map((w) => w[0])
     .join("")
