@@ -237,3 +237,35 @@
 .dotsLive { background-image: none; }
 .topbar { background: #0a0a0a; }
 .tabs { background: #121212; }
+
+/* driver profiles */
+.profilesGrid { display: grid; gap: 16px; }
+.profilesGrid .card { margin-bottom: 0; }
+.profile { position: relative; overflow: hidden; }
+.profile::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 3px; background: var(--c); }
+.profileHead { display: flex; align-items: center; gap: 16px; }
+.profileSub { margin-top: 6px; font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.avatar_xl { --size: 64px; font-size: 1.3rem; }
+.profile .dnameLg > span:first-child { font-size: 1.7rem; font-weight: 700; letter-spacing: -0.02em; }
+.badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+.badge { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 8px; border-radius: 3px; border: 1px solid var(--line); }
+.badgeRecord { background: var(--record); border-color: var(--record); color: #fff; }
+.badgeGold { background: var(--accent); border-color: var(--accent); color: #0a0a0a; }
+.badgeGood { background: var(--pb); border-color: var(--pb); color: #0a0a0a; }
+.badgeBad { border-color: var(--bad); color: var(--bad); }
+.statGrid { display: grid; grid-template-columns: repeat(4, 1fr); margin-top: 16px; border-top: 1px solid var(--hair); border-left: 1px solid var(--hair); }
+.stat { padding: 9px 10px; min-width: 0; border-right: 1px solid var(--hair); border-bottom: 1px solid var(--hair); }
+.statV { font-size: 1.15rem; font-weight: 700; line-height: 1.1; white-space: nowrap; }
+.statL { margin-top: 4px; font-family: var(--mono); font-size: 0.54rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.favs { margin: 14px 0 0; }
+.favs > div { display: grid; gap: 4px; padding: 8px 0; border-bottom: 1px solid var(--hair); }
+.favs dt { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.favs dd { margin: 0; font-weight: 600; min-width: 0; }
+.favs dd svg { vertical-align: -0.35em; }
+.favN { margin-left: 8px; font-family: var(--mono); font-size: 0.64rem; font-weight: 400; color: var(--muted); }
+@media (min-width: 640px) { .statV { font-size: 1.35rem; } }
+@media (min-width: 1100px) { .profilesGrid { grid-template-columns: repeat(auto-fill, minmax(520px, 1fr)); } }
+
+/* big nicknames shrink on narrow phones instead of breaking mid-word */
+.driverName { font-size: clamp(1.5rem, 8vw, 2.1rem); overflow-wrap: normal; word-break: keep-all; }
+.dname > span:first-child { overflow-wrap: normal; word-break: keep-all; }
