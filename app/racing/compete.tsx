@@ -63,7 +63,15 @@ export function CompeteView({ comps, drivers, now }: { comps: Competition[]; dri
   return (
     <>
       {comps.map((c) => (
-        <CompCard key={c.id} c={c} drivers={drivers} now={now} />
+        // Wide screens: rules in their own card beside the competition. Phones: a
+        // collapsible row inside the card (the side card is hidden).
+        <div key={c.id} className={s.compLayout}>
+          <CompCard c={c} drivers={drivers} now={now} />
+          <aside className={`${s.card} ${s.rulesSide}`}>
+            <h2 className={s.cardTitle}><span>Rules</span></h2>
+            <Rules c={c} plain />
+          </aside>
+        </div>
       ))}
     </>
   );

@@ -39,8 +39,6 @@
 .brand > a { display: inline-flex; align-items: center; gap: 10px; }
 .wordmark { font-family: var(--font-racing-wordmark), sans-serif; font-weight: 700; font-size: 1.02rem; letter-spacing: 0.36em; margin-right: -0.36em; }
 .model { font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.08em; border: 1px solid var(--line); border-radius: 3px; padding: 1px 5px; line-height: 1.4; }
-.back { font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
-.back:hover { color: var(--accent); }
 .status { display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
 .dot { width: 9px; height: 9px; border-radius: 50%; background: #3a3a37; display: inline-block; }
 .dotLive { background: var(--accent); box-shadow: 0 0 8px var(--accent); animation: pulse 1.6s infinite; }
@@ -230,9 +228,7 @@
 .topbar { flex-wrap: wrap; row-gap: 6px; }
 .model { white-space: nowrap; }
 .status { margin-left: auto; }
-@media (max-width: 520px) {
-  .brand > .back { display: none; } /* also in the intro + footer */
-}
+
 
 /* animated dot grid (dots.ts) replaces the static one */
 .root { position: relative; isolation: isolate; }
@@ -328,6 +324,13 @@
 .rulesLabel { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
 .rulesGist { color: var(--muted); min-width: 0; }
 .rules[open] .rulesGist { visibility: hidden; }
+.rulesSide { display: none; }
+@media (min-width: 1000px) {
+  .compLayout { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+  .rulesSide { display: block; }
+  .compLayout .rules { display: none; }
+  .rulesSide .rulesList li { padding: 4px 0; }
+}
 .rulesList { margin: 0; padding: 0 0 0 1.1em; list-style: disc; line-height: 1.45; font-size: 0.86rem; }
 .rulesList li { padding: 2px 0; }
 .rulesList li::marker { color: var(--muted); }
