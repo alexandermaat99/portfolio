@@ -212,7 +212,7 @@ export default function RacingApp({ initial, initialTab = "live" }: { initial: R
         )}
 
         <nav className={s.tabs} aria-label="Views">
-          {(["live", "records", "nights", "drivers", ...(comps.length ? ["compete"] : [])] as Tab[]).map((t, i) => (
+          {(["live", "records", "nights", "drivers", "compete"] as Tab[]).map((t, i) => (
             <button key={t} className={`${s.tab} ${tab === t ? s.tabOn : ""}`} onClick={() => setTab(t)}>
               <span className={s.k}>0{i + 1}</span>
               {t === "live" ? (tonightActive || isLive ? "Tonight" : "Latest") : t === "records" ? "Records" : t === "nights" ? "Nights" : t === "drivers" ? "Drivers" : "Compete"}
