@@ -92,11 +92,50 @@ export interface DriverProfile {
   badges: { key: string; label: string; tier: "record" | "gold" | "good" | "bad" | "plain" }[];
 }
 
+export interface CompetitionRow {
+  driver_id: number;
+  pos: number | null;
+  best: number | null;
+  gap: number | null;
+  best_car: string | null;
+  attack_laps_used: number;
+  attack_laps_over: number;
+  practice_laps_used: number;
+  practice_seconds_used: number;
+  practice_over: boolean;
+}
+
+export interface Competition {
+  id: number;
+  name: string;
+  track_id: number;
+  track_config: string;
+  track_name: string;
+  track_key: string;
+  cars: string[];
+  phase: "upcoming" | "practice" | "between" | "attack" | "finished";
+  practice_start: number | null;
+  practice_end: number | null;
+  practice_laps: number | null;
+  practice_minutes: number | null;
+  attack_start: number;
+  attack_end: number;
+  attack_laps: number | null;
+  attack_minutes: number | null;
+  fee_cents: number;
+  pool_cents: number;
+  paid_count: number;
+  payouts: { place: number; percent: number; cents: number }[];
+  entrants: number;
+  standings: CompetitionRow[];
+}
+
 export interface RacingData {
   updated_at: number;
   local_url: string | null; // the full app on the home network
   track_maps?: Record<string, string>; // track key -> SVG path of the outline (0-100 box)
   driver_stats?: DriverProfile[];
+  competitions?: Competition[];
   drivers: Driver[];
   session_id: number | null;
   tonight: ComboStandings[];
@@ -107,6 +146,7 @@ export interface RacingData {
 
 export interface LiveEvent {
   id: number;
+  label?: string; // overrides the default pop-up label (e.g. competition lead changes)
   type: "lap" | "record" | "night_best" | "pb";
   at: number;
   driver: { id?: number; name: string; nickname?: string | null; color: string; photo?: string | null } | null;
