@@ -1,7 +1,7 @@
 "use client";
 // app/racing/compete.tsx: read-only view of SimStats competitions (rules, countdown, standings, pool).
 
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import s from "./racing.module.css";
 import type { Competition, Driver } from "./lib/types";
 import { Avatar, CarLabel, DriverName, TrackIcon } from "./visuals";
@@ -50,13 +50,73 @@ function nextDeadline(c: Competition, now: number): [number, string] | null {
 }
 
 export function CompeteView({ comps, drivers, now }: { comps: Competition[]; drivers: Driver[]; now: number }) {
-  if (!comps.length) return <div className={`${s.card} ${s.empty}`}>No competition running right now.</div>;
+  if (!comps.length)
+    return (
+      <>
+        <div className={`${s.card} ${s.empty}`}>No competition running right now. Here&apos;s how they work:</div>
+        <RulesCard />
+      </>
+    );
   return (
     <>
       {comps.map((c) => (
-        <CompCard key={c.id} c={c} drivers={drivers} now={now} />
+        <div key={c.id}>
+          <CompCard c={c} drivers={drivers} now={now} />
+          <RulesCard c={c} />
+        </div>
       ))}
     </>
+  );
+}
+
+// The rules, filled in from the competition's settings (or general wording when none is
+// running). Keep in step with SimStats' competition.py: that's what actually scores it.
+function allowanceText(laps: number | null, mins: number | null) {
+  if (laps && mins) return `${laps} laps or ${mins} minutes of lap time, whichever runs out first`;
+  if (laps) return `${laps} laps`;
+  if (mins) return `${mins} minutes of lap time (your lap times added up; a lap that would go past the limit doesn't count)`;
+  return null;
+}
+
+function RulesCard({ c }: { c?: Competition }) {
+  const track = c ? `${c.track_name}${c.track_config ? ` (${c.track_config})` : ""}` : "one track, picked for the competition";
+  const cars = c ? c.cars.join(", ") : "a short list of allowed cars";
+  const attackAllowance = c ? allowanceText(c.attack_laps, c.attack_minutes) : "a set number of laps (or minutes)";
+  const practiceAllowance = c ? allowanceText(c.practice_laps, c.practice_minutes) : null;
+  const split = c?.payouts.length
+    ? c.payouts.map((p) => `${p.percent}% to P${p.place}`).join(", ")
+    : "a split announced up front (e.g. 70% to P1, 30% to P2)";
+  const fee = c ? money(c.fee_cents) : "the entry fee";
+
+  const rules: [string, ReactNode][] = [
+    ["Entry", <>Entry is {fee}. Everyone who pays goes into the pool, which is paid out {split} once the time attack closes.{c ? ` ${c.paid_count} of ${c.entrants} entrant${c.entrants === 1 ? " has" : "s have"} paid so far.` : ""}</>],
+    ["Track & cars", <>Only laps at {track} in {c ? <b>{cars}</b> : cars} count. You can switch between the allowed cars. Laps anywhere else, or in any other car, are ignored completely: they don&apos;t count and don&apos;t use up anything.</>],
+    ["Practice", c && !c.practice_start
+      ? <>There&apos;s no practice window for this one: go straight to the time attack.</>
+      : <>{c?.practice_start ? <>Practice runs {when(c.practice_start)} → {when(c.practice_end)}. </> : <>There&apos;s a practice window before the time attack. </>}
+          {practiceAllowance ? <>Each driver gets {practiceAllowance} of practice; going over is flagged on the leaderboard. </> : c ? <>Practice is unlimited. </> : <>It may be capped at a set number of laps or minutes. </>}
+          Practice laps never count towards the result.</>],
+    ["Time attack", <>{c ? <>The time attack runs {when(c.attack_start)} → {when(c.attack_end)}. </> : <>Then there&apos;s a time-attack window (usually a week). </>}
+      Each driver gets <b>{attackAllowance ?? "unlimited laps"}</b>: the first laps you drive in the window, in order. Once they&apos;re used up, later laps don&apos;t count, even if they&apos;re faster. So don&apos;t &ldquo;just warm up&rdquo; in an allowed car.</>],
+    ["Free laps", <>Out-laps and in-laps (anything that touches pit road), and laps SimStats didn&apos;t see from the start/finish line, don&apos;t use up an attempt.</>],
+    ["Clean laps", <>A lap only sets a time if it&apos;s clean: no incident points, never off track, no pit lane, no reset or tow. A lap that isn&apos;t clean still uses up an attempt.</>],
+    ["Result", <>Your fastest clean lap that counts is your result, and the fastest wins. On an identical time, whoever set it first is ahead.</>],
+    ["Timing", <>SimStats records every lap straight from iRacing; nobody types times in. Laps go to whoever is selected as driving in SimStats, so check it&apos;s you before you leave the pits.</>],
+    ["Emails", <>If you&apos;ve given an email you&apos;ll hear when someone knocks you down the order, before each window opens and closes, and when results are final.</>],
+    ["Anything else", <>Anything these rules don&apos;t cover (a crash, a dropped connection, a dispute) is the organizer&apos;s call.</>],
+  ];
+  return (
+    <section className={s.card}>
+      <h2 className={s.cardTitle}><span>Rules{c ? ` · ${c.name}` : ""}</span></h2>
+      <ol className={s.rulesList}>
+        {rules.map(([title, body]) => (
+          <li key={title}>
+            <b className={s.ruleTitle}>{title}</b>
+            <span>{body}</span>
+          </li>
+        ))}
+      </ol>
+    </section>
   );
 }
 

@@ -317,6 +317,11 @@
 .compRules > div { display: grid; grid-template-columns: 6.5em 1fr; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--hair); font-size: 0.86rem; }
 .compRules dt { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); padding-top: 2px; }
 .compRules dd { margin: 0; display: flex; flex-wrap: wrap; }
+.rulesList { list-style: none; margin: 0; padding: 0; counter-reset: rule; }
+.rulesList li { counter-increment: rule; display: grid; grid-template-columns: 2.2em 1fr; padding: 9px 0; border-bottom: 1px solid var(--hair); font-size: 0.88rem; line-height: 1.5; }
+.rulesList li:last-child { border-bottom: 0; }
+.rulesList li::before { content: counter(rule, decimal-leading-zero); font-family: var(--mono); font-size: 0.64rem; color: var(--muted); padding-top: 3px; grid-row: span 2; }
+.ruleTitle { display: block; font-family: var(--mono); font-size: 0.62rem; font-weight: 400; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
 
 /* tabs: never wider than the screen; scroll sideways on narrow phones */
 .tabs { max-width: 100%; overflow-x: auto; scrollbar-width: none; }
