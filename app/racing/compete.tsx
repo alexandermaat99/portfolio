@@ -81,20 +81,24 @@ export function CompeteView({ comps, drivers, now }: { comps: Competition[]; dri
 // card above already shows track, cars, dates and money, so this is just the mechanics.
 // Keep in step with SimStats' competition.py: that's what actually scores it.
 function attempts(laps: number | null, mins: number | null) {
-  if (laps && mins) return `first ${laps} laps (or ${mins} min)`;
-  if (laps) return `first ${laps} laps`;
-  if (mins) return `first ${mins} min of laps`;
+  if (laps && mins) return `${laps} attempts (or ${mins} min)`;
+  if (laps) return `${laps} attempt${laps === 1 ? "" : "s"}`;
+  if (mins) return `${mins} min of laps`;
   return null;
 }
+const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
 
 function Rules({ c, plain = false }: { c?: Competition; plain?: boolean }) {
   const tries = c ? attempts(c.attack_laps, c.attack_minutes) : "first few laps";
-  const cap = c ? attempts(c.practice_laps, c.practice_minutes)?.replace("first ", "") : null;
+  const cap = c ? [c.practice_laps ? plural(c.practice_laps, "lap") : "", c.practice_minutes ? `${c.practice_minutes} min` : ""].filter(Boolean).join(" or ") : null;
+  const warmups = c?.attack_warmup_laps ?? 0;
   const split = c?.payouts.length ? c.payouts.map((p) => p.percent).join("/") : null;
   const rules: ReactNode[] = [
     <>Only the set track in an allowed car counts. Anything else is ignored.</>,
     <>Practice never counts{cap ? <> (cap: {cap})</> : null}.</>,
-    tries ? <>Time attack: your <b>{tries}</b> in an allowed car are your attempts. No warm-ups.</> : <>Time attack: unlimited attempts.</>,
+    !c ? <>Time attack: a few attempts each, plus any free warm-up laps each time you get in.</>
+      : <>Time attack: <b>{tries ?? "unlimited attempts"}</b> in an allowed car.{" "}
+          {warmups ? <>Each time you get in, your first <b>{plural(warmups, "lap")}</b> {warmups === 1 ? "is a free warm-up" : "are free warm-ups"}.</> : <>No warm-ups: your first laps are your attempts.</>}</>,
     <>Out-laps, in-laps and partial laps are free.</>,
     <>Clean laps only: no incidents, off-tracks, pit lane or resets. A dirty lap still uses an attempt.</>,
     <>Fastest counted lap wins. Ties go to whoever set it first.</>,
@@ -113,7 +117,7 @@ function Rules({ c, plain = false }: { c?: Competition; plain?: boolean }) {
     <details className={s.rules}>
       <summary>
         <span className={s.rulesLabel}>Rules</span>
-        <span className={s.rulesGist}>{tries ? `${tries} count` : "unlimited attempts"} · clean laps only · out-laps free</span>
+        <span className={s.rulesGist}>{tries ?? "unlimited attempts"} · {warmups ? `${plural(warmups, "warm-up")} per visit` : "no warm-ups"} · clean laps only</span>
       </summary>
       {list}
     </details>
@@ -189,8 +193,8 @@ function CompCard({ c, drivers, now }: { c: Competition; drivers: Driver[]; now:
         <div>
           <dt>Time attack</dt>
           <dd>
-            {when(c.attack_start)} → {when(c.attack_end)} · {limit(c.attack_laps, c.attack_minutes)} each, best clean lap
-            counts
+            {when(c.attack_start)} → {when(c.attack_end)} · {limit(c.attack_laps, c.attack_minutes)} each
+            {c.attack_warmup_laps ? ` + ${plural(c.attack_warmup_laps, "warm-up lap")} per visit` : ""}, best clean lap counts
           </dd>
         </div>
       </dl>

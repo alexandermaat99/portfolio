@@ -122,6 +122,7 @@ export interface Competition {
   attack_end: number;
   attack_laps: number | null;
   attack_minutes: number | null;
+  attack_warmup_laps?: number; // free laps at the start of each visit
   fee_cents: number;
   pool_cents: number;
   paid_count: number;
