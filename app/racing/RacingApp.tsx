@@ -180,9 +180,6 @@ export default function RacingApp({ initial, initialTab = "live" }: { initial: R
             <span className={s.wordmark}>SIMSTATS</span>
             <span className={s.model}>SS-1</span>
           </Link>
-          <Link href="/" className={s.back}>
-            by Alex Maat
-          </Link>
         </div>
         <div className={s.status}>
           <span className={`${s.dot} ${isLive ? s.dotLive : ""}`} />
@@ -475,8 +472,8 @@ function StandingsTable({
   );
 }
 
-// Tonight's laps, newest first, 10 to a page.
-const LAPS_PER_PAGE = 10;
+// Tonight's laps, newest first, 9 to a page.
+const LAPS_PER_PAGE = 9;
 function PagedLaps(props: { laps: Lap[]; driverById: (id: number | null | undefined) => Driver | undefined; colorFor: (lap: Lap) => string }) {
   const { laps } = props;
   const pages = Math.max(1, Math.ceil(laps.length / LAPS_PER_PAGE));
