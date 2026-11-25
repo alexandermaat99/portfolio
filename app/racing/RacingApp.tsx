@@ -9,7 +9,7 @@ import { LAP_GUSTS, startDotField, type DotField } from "./dots";
 import { CompeteView } from "./compete";
 import { Avatar, BrandLogo, CarLabel, DriverName, nick, TrackIcon, TrackMapsContext } from "./visuals";
 import type { Combo, ComboStandings, Driver, Lap, LiveEvent, Night, RacingSnapshot, Standing } from "./lib/types";
-import { TAB_COOKIE, type Tab } from "./lib/tabs";
+import { TAB_COOKIE, tabPath, type Tab } from "./lib/tabs";
 
 
 const DriversContext = createContext<Driver[]>([]);
@@ -53,16 +53,13 @@ const colorVar = (c: string | undefined) => ({ "--c": c ?? "var(--border)" }) as
 
 export default function RacingApp({ initial, initialTab = "live" }: { initial: RacingSnapshot; initialTab?: Tab }) {
   const [snap, setSnap] = useState(initial);
-  // The open tab lives in the URL (/racing?tab=drivers) and a cookie; the server reads
-  // them, so the page arrives already on the right tab (no flash on refresh).
+  // The open tab lives in the path (/racing/nights) and a cookie; the server reads them,
+  // so the page arrives already on the right tab (no flash on refresh).
   const [tab, setTabState] = useState<Tab>(initialTab);
   const setTab = (t: Tab) => {
     setTabState(t);
     document.cookie = `${TAB_COOKIE}=${t}; path=/racing; max-age=31536000; samesite=lax`;
-    const url = new URL(window.location.href);
-    if (t === "live") url.searchParams.delete("tab");
-    else url.searchParams.set("tab", t);
-    window.history.replaceState(window.history.state, "", url);
+    window.history.replaceState(window.history.state, "", tabPath(t));
   };
   const [boardMode, setBoardMode] = useState<"tonight" | "all">("tonight");
   const [openNight, setOpenNight] = useState<number | null>(null);
@@ -179,10 +176,10 @@ export default function RacingApp({ initial, initialTab = "live" }: { initial: R
       <canvas ref={canvasRef} className={s.dotCanvas} aria-hidden />
       <header className={s.topbar}>
         <div className={s.brand}>
-          <a href="/racing">
+          <Link href="/racing" onClick={(e) => { e.preventDefault(); setTab("live"); window.scrollTo(0, 0); }}>
             <span className={s.wordmark}>SIMSTATS</span>
             <span className={s.model}>SS-1</span>
-          </a>
+          </Link>
           <Link href="/" className={s.back}>
             by Alex Maat
           </Link>

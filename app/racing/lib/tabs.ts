@@ -6,3 +6,8 @@ export const TAB_COOKIE = "racingTab";
 export function parseTab(t: string | null | undefined): Tab | null {
   return t === "live" || t === "records" || t === "nights" || t === "drivers" || t === "compete" ? t : null;
 }
+
+/** URL for a tab: /racing for Tonight, /racing/<tab> for the rest. */
+export function tabPath(t: Tab): string {
+  return t === "live" ? "/racing" : `/racing/${t}`;
+}
