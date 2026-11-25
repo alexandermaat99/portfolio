@@ -3,13 +3,14 @@
 // No live lap timer here; new laps pop up and standings refresh as they're set.
 
 import Link from "next/link";
-import { createContext, useCallback, useContext, useEffect, useRef, useState, type CSSProperties } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import s from "./racing.module.css";
 import { LAP_GUSTS, startDotField, type DotField } from "./dots";
+import { CompeteView } from "./compete";
 import { Avatar, BrandLogo, CarLabel, DriverName, nick, TrackIcon, TrackMapsContext } from "./visuals";
 import type { Combo, ComboStandings, Driver, Lap, LiveEvent, Night, RacingSnapshot, Standing } from "./lib/types";
 
-type Tab = "live" | "records" | "nights" | "drivers";
+type Tab = "live" | "records" | "nights" | "drivers" | "compete";
 
 const DriversContext = createContext<Driver[]>([]);
 
@@ -56,7 +57,7 @@ export default function RacingApp({ initial }: { initial: RacingSnapshot }) {
   // Deep links: /racing?tab=drivers (records, nights, drivers).
   useEffect(() => {
     const t = new URLSearchParams(window.location.search).get("tab");
-    if (t === "records" || t === "nights" || t === "drivers") setTab(t);
+    if (t === "records" || t === "nights" || t === "drivers" || t === "compete") setTab(t);
   }, []);
   const [boardMode, setBoardMode] = useState<"tonight" | "all">("tonight");
   const [openNight, setOpenNight] = useState<number | null>(null);
@@ -120,6 +121,34 @@ export default function RacingApp({ initial }: { initial: RacingSnapshot }) {
     setTimeout(() => setToasts((t) => t.filter((e) => !ids.has(e.id))), 7000);
   }, [live?.events]);
 
+  // Competitions (shown in their own tab) and a pop-up when someone takes the lead.
+  const comps = useMemo(() => data?.competitions ?? [], [data?.competitions]);
+  const leaders = useRef<Record<number, number | null> | null>(null);
+  useEffect(() => {
+    const now: Record<number, number | null> = {};
+    for (const c of comps) now[c.id] = c.standings.find((r) => r.pos === 1)?.driver_id ?? null;
+    const before = leaders.current;
+    leaders.current = now;
+    if (!before) return; // first load: nothing to announce
+    const fresh: LiveEvent[] = [];
+    for (const c of comps) {
+      const lead = now[c.id];
+      if (lead == null || before[c.id] === undefined || before[c.id] === lead) continue;
+      const d = data?.drivers.find((x) => x.id === lead);
+      const row = c.standings.find((r) => r.driver_id === lead);
+      fresh.push({
+        id: -Date.now() - c.id, type: "record", at: Date.now() / 1000, label: `Leads ${c.name}`,
+        driver: d ? { id: d.id, name: d.name, nickname: d.nickname, color: d.color, photo: d.photo } : null,
+        lap: { lap_number: 0, lap_time: row?.best ?? 0, clean: 1, incidents: 0 },
+      });
+    }
+    if (!fresh.length) return;
+    setToasts((t) => [...t, ...fresh]);
+    dots.current?.confetti();
+    const ids = new Set(fresh.map((e) => e.id));
+    setTimeout(() => setToasts((t) => t.filter((e) => !ids.has(e.id))), 8000);
+  }, [comps, data?.drivers]);
+
   const driverById = useCallback(
     (id: number | null | undefined): Driver | undefined => data?.drivers.find((d) => d.id === id),
     [data]
@@ -178,10 +207,10 @@ export default function RacingApp({ initial }: { initial: RacingSnapshot }) {
         )}
 
         <nav className={s.tabs} aria-label="Views">
-          {(["live", "records", "nights", "drivers"] as Tab[]).map((t, i) => (
+          {(["live", "records", "nights", "drivers", ...(comps.length ? ["compete"] : [])] as Tab[]).map((t, i) => (
             <button key={t} className={`${s.tab} ${tab === t ? s.tabOn : ""}`} onClick={() => setTab(t)}>
               <span className={s.k}>0{i + 1}</span>
-              {t === "live" ? (tonightActive || isLive ? "Tonight" : "Latest") : t === "records" ? "Records" : t === "nights" ? "Nights" : "Drivers"}
+              {t === "live" ? (tonightActive || isLive ? "Tonight" : "Latest") : t === "records" ? "Records" : t === "nights" ? "Nights" : t === "drivers" ? "Drivers" : "Compete"}
             </button>
           ))}
         </nav>
@@ -201,6 +230,8 @@ export default function RacingApp({ initial }: { initial: RacingSnapshot }) {
           <RecordsView tracks={data.records} />
         ) : tab === "drivers" ? (
           <DriversView data={data} />
+        ) : tab === "compete" ? (
+          <CompeteView comps={comps} drivers={data.drivers} now={snap.now} />
         ) : (
           <NightsView nights={data.nights} open={openNight} setOpen={setOpenNight} />
         )}
@@ -215,8 +246,9 @@ export default function RacingApp({ initial }: { initial: RacingSnapshot }) {
           <div key={e.id} className={s.toast} style={colorVar(e.driver?.color)}>
             <Avatar driver={e.driver} size="md" />
             <div style={{ flex: 1 }}>
-              <div className={s.toastLabel}>{BADGE_LABELS[e.type] ?? "New lap"}</div>
-              <b>{e.driver ? nick(e.driver) : "Unassigned"}</b> <span className={s.muted}>· Lap {e.lap.lap_number}</span>
+              <div className={s.toastLabel}>{e.label ?? BADGE_LABELS[e.type] ?? "New lap"}</div>
+              <b>{e.driver ? nick(e.driver) : "Unassigned"}</b>{" "}
+              {e.lap.lap_number > 0 && <span className={s.muted}>· Lap {e.lap.lap_number}</span>}
               {!e.lap.clean && <span className={s.muted}> · not clean</span>}
             </div>
             <div className={`${s.t} ${s.num} ${e.lap.clean ? "" : s.muted}`}>{fmtLap(e.lap.lap_time)}</div>

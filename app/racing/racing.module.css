@@ -304,3 +304,22 @@
   .board th:nth-child(4), .board td:nth-child(4) { display: none; }
   .board .best { font-size: 0.92rem; }
 }
+
+/* competitions */
+.compHead { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--hair); }
+.compName { margin: 0; font-size: 1.05rem; font-weight: 700; }
+.compStrip { display: grid; grid-template-columns: repeat(3, 1fr); border-bottom: 1px solid var(--hair); }
+.compStrip > div { padding: 10px 8px; border-left: 1px solid var(--hair); display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.compStrip > div:first-child { border-left: 0; padding-left: 0; }
+.compStrip b { font-size: 1rem; white-space: nowrap; }
+.compStrip span { font-family: var(--mono); font-size: 0.56rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.compRules { margin: 10px 0 14px; }
+.compRules > div { display: grid; grid-template-columns: 6.5em 1fr; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--hair); font-size: 0.86rem; }
+.compRules dt { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); padding-top: 2px; }
+.compRules dd { margin: 0; display: flex; flex-wrap: wrap; }
+
+/* tabs: never wider than the screen; scroll sideways on narrow phones */
+.tabs { max-width: 100%; overflow-x: auto; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { flex: none; }
+@media (max-width: 480px) { .tab { padding: 8px 11px 9px; font-size: 0.64rem; letter-spacing: 0.08em; } }
