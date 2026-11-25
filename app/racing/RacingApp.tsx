@@ -9,8 +9,8 @@ import { LAP_GUSTS, startDotField, type DotField } from "./dots";
 import { CompeteView } from "./compete";
 import { Avatar, BrandLogo, CarLabel, DriverName, nick, TrackIcon, TrackMapsContext } from "./visuals";
 import type { Combo, ComboStandings, Driver, Lap, LiveEvent, Night, RacingSnapshot, Standing } from "./lib/types";
+import { TAB_COOKIE, type Tab } from "./lib/tabs";
 
-type Tab = "live" | "records" | "nights" | "drivers" | "compete";
 
 const DriversContext = createContext<Driver[]>([]);
 
@@ -51,23 +51,14 @@ const colorVar = (c: string | undefined) => ({ "--c": c ?? "var(--border)" }) as
 
 // -- component -----------------------------------------------------------------
 
-export default function RacingApp({ initial }: { initial: RacingSnapshot }) {
+export default function RacingApp({ initial, initialTab = "live" }: { initial: RacingSnapshot; initialTab?: Tab }) {
   const [snap, setSnap] = useState(initial);
-  const [tab, setTabState] = useState<Tab>("live");
-  // The open tab lives in the URL (/racing?tab=drivers), so refreshing or sharing the link
-  // keeps it. Opening plain /racing goes back to the tab you had open last time.
-  useEffect(() => {
-    const isTab = (t: string | null): t is Tab =>
-      t === "live" || t === "records" || t === "nights" || t === "drivers" || t === "compete";
-    let t = new URLSearchParams(window.location.search).get("tab");
-    if (!isTab(t)) {
-      try { t = localStorage.getItem("racingTab"); } catch { t = null; }
-    }
-    if (isTab(t) && t !== "live") setTab(t);
-  }, []);
+  // The open tab lives in the URL (/racing?tab=drivers) and a cookie; the server reads
+  // them, so the page arrives already on the right tab (no flash on refresh).
+  const [tab, setTabState] = useState<Tab>(initialTab);
   const setTab = (t: Tab) => {
     setTabState(t);
-    try { localStorage.setItem("racingTab", t); } catch {}
+    document.cookie = `${TAB_COOKIE}=${t}; path=/racing; max-age=31536000; samesite=lax`;
     const url = new URL(window.location.href);
     if (t === "live") url.searchParams.delete("tab");
     else url.searchParams.set("tab", t);
