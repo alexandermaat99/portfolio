@@ -53,12 +53,26 @@ const colorVar = (c: string | undefined) => ({ "--c": c ?? "var(--border)" }) as
 
 export default function RacingApp({ initial }: { initial: RacingSnapshot }) {
   const [snap, setSnap] = useState(initial);
-  const [tab, setTab] = useState<Tab>("live");
-  // Deep links: /racing?tab=drivers (records, nights, drivers).
+  const [tab, setTabState] = useState<Tab>("live");
+  // The open tab lives in the URL (/racing?tab=drivers), so refreshing or sharing the link
+  // keeps it. Opening plain /racing goes back to the tab you had open last time.
   useEffect(() => {
-    const t = new URLSearchParams(window.location.search).get("tab");
-    if (t === "records" || t === "nights" || t === "drivers" || t === "compete") setTab(t);
+    const isTab = (t: string | null): t is Tab =>
+      t === "live" || t === "records" || t === "nights" || t === "drivers" || t === "compete";
+    let t = new URLSearchParams(window.location.search).get("tab");
+    if (!isTab(t)) {
+      try { t = localStorage.getItem("racingTab"); } catch { t = null; }
+    }
+    if (isTab(t) && t !== "live") setTab(t);
   }, []);
+  const setTab = (t: Tab) => {
+    setTabState(t);
+    try { localStorage.setItem("racingTab", t); } catch {}
+    const url = new URL(window.location.href);
+    if (t === "live") url.searchParams.delete("tab");
+    else url.searchParams.set("tab", t);
+    window.history.replaceState(window.history.state, "", url);
+  };
   const [boardMode, setBoardMode] = useState<"tonight" | "all">("tonight");
   const [openNight, setOpenNight] = useState<number | null>(null);
   const [toasts, setToasts] = useState<LiveEvent[]>([]);
