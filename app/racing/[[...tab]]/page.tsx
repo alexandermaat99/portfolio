@@ -15,6 +15,10 @@ const title = "Sim Racing Leaderboard | Alex Maat";
 const description =
   "Live lap times and leaderboards from hot-seat iRacing nights, recorded automatically by SimStats, an app Alex Maat built.";
 
+// The preview card (app/racing/opengraph-image.tsx). Listed explicitly because this page's
+// openGraph settings would otherwise replace it.
+const image = { url: "/racing/opengraph-image", width: 1200, height: 630, alt: "SimStats: sim racing leaderboard" };
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const tab = parseTab((await params).tab?.[0]) ?? "live";
   const url = tabPath(tab);
@@ -22,8 +26,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title,
     description,
     alternates: { canonical: url },
-    openGraph: { title, description, url },
-    twitter: { title, description },
+    openGraph: { title, description, url, images: [image] },
+    twitter: { card: "summary_large_image", title, description, images: [image.url] },
   };
 }
 
