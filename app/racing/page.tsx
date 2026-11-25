@@ -1,6 +1,8 @@
 // app/racing/page.tsx
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import RacingApp from "./RacingApp";
+import { parseTab, TAB_COOKIE } from "./lib/tabs";
 import { loadSnapshot } from "./lib/store";
 import type { RacingSnapshot } from "./lib/types";
 
@@ -17,12 +19,16 @@ export const metadata: Metadata = {
   twitter: { title: "Sim Racing Leaderboard | Alex Maat", description },
 };
 
-export default async function RacingPage() {
+export default async function RacingPage({ searchParams }: { searchParams: Promise<{ tab?: string | string[] }> }) {
+  // Pick the tab on the server (from ?tab=, else the last one this visitor had open) so a
+  // refresh doesn't flash "Tonight" before switching.
+  const { tab } = await searchParams;
+  const initialTab = parseTab(Array.isArray(tab) ? tab[0] : tab) ?? parseTab((await cookies()).get(TAB_COOKIE)?.value) ?? "live";
   let initial: RacingSnapshot;
   try {
     initial = await loadSnapshot();
   } catch {
     initial = { live: null, data: null, now: Date.now() / 1000 };
   }
-  return <RacingApp initial={initial} />;
+  return <RacingApp initial={initial} initialTab={initialTab} />;
 }
