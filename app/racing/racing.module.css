@@ -288,3 +288,19 @@
 .dlChev { width: 1.2em; text-align: center; font-family: var(--mono); color: var(--muted); }
 .profileDetail { padding: 2px 0 16px; }
 @media (max-width: 420px) { .dlPips { display: none; } }
+
+/* leaderboards fit their card: the name column takes whatever width is left
+   (max-width:0 lets a 100%-wide cell shrink) and long names/cars get "…" */
+.board td.name { max-width: 0; }
+.board td.name .nameInner { display: flex; min-width: 0; }
+.board td.name .nameInner > span:last-child { min-width: 0; flex: 1; }
+.board td.name .dname { display: flex; max-width: 100%; }
+.board td.name .dname > span, .board td.name .bestCar { display: block; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.board td:not(.name):not(.pos) { padding-left: 8px; padding-right: 4px; }
+.board td:last-child, .board th:last-child { padding-right: 0; }
+.board .avatar { flex: none; }
+.board td.name { min-width: 7.5em; }
+@media (max-width: 480px) {
+  .board th:nth-child(4), .board td:nth-child(4) { display: none; }
+  .board .best { font-size: 0.92rem; }
+}
