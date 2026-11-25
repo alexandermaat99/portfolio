@@ -379,9 +379,9 @@ function LiveView({
 
   const lapsCard = tonightActive ? (
     <section className={s.card}>
-      <h2 className={s.cardTitle}><span>Tonight&apos;s laps</span></h2>
+      <h2 className={s.cardTitle}><span>Tonight&apos;s laps</span>{laps.length > 0 && <span className={s.small}>{laps.length}</span>}</h2>
       {laps.length ? (
-        <LapList laps={laps} driverById={driverById} colorFor={lapColorer(key, nightRows, allRows)} />
+        <PagedLaps laps={laps} driverById={driverById} colorFor={lapColorer(key, nightRows, allRows)} />
       ) : (
         <div className={s.empty}>Laps show up here as they&apos;re driven.</div>
       )}
@@ -472,6 +472,37 @@ function StandingsTable({
         ))}
       </tbody>
     </table>
+  );
+}
+
+// Tonight's laps, newest first, 10 to a page.
+const LAPS_PER_PAGE = 10;
+function PagedLaps(props: { laps: Lap[]; driverById: (id: number | null | undefined) => Driver | undefined; colorFor: (lap: Lap) => string }) {
+  const { laps } = props;
+  const pages = Math.max(1, Math.ceil(laps.length / LAPS_PER_PAGE));
+  const [want, setPage] = useState(0);
+  const page = Math.min(want, pages - 1);
+  const from = page * LAPS_PER_PAGE;
+  const shown = laps.slice(from, from + LAPS_PER_PAGE);
+  return (
+    <>
+      <LapList {...props} laps={shown} />
+      {pages > 1 && (
+        <div className={`${s.pager} ${s.num}`}>
+          <span className={s.seg}>
+            <button onClick={() => setPage(0)} disabled={page === 0} aria-label="Newest laps">«</button>
+            <button onClick={() => setPage(page - 1)} disabled={page === 0} aria-label="Newer laps">‹ Newer</button>
+          </span>
+          <span className={s.muted}>
+            {from + 1}–{from + shown.length} of {laps.length}
+          </span>
+          <span className={s.seg}>
+            <button onClick={() => setPage(page + 1)} disabled={page >= pages - 1} aria-label="Older laps">Older ›</button>
+            <button onClick={() => setPage(pages - 1)} disabled={page >= pages - 1} aria-label="Oldest laps">»</button>
+          </span>
+        </div>
+      )}
+    </>
   );
 }
 
