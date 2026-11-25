@@ -320,11 +320,23 @@
 .compRules > div { display: grid; grid-template-columns: 6.5em 1fr; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--hair); font-size: 0.86rem; }
 .compRules dt { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); padding-top: 2px; }
 .compRules dd { margin: 0; display: flex; flex-wrap: wrap; }
-.rulesList { list-style: none; margin: 0; padding: 0; counter-reset: rule; }
-.rulesList li { counter-increment: rule; display: grid; grid-template-columns: 2.2em 1fr; padding: 9px 0; border-bottom: 1px solid var(--hair); font-size: 0.88rem; line-height: 1.5; }
-.rulesList li:last-child { border-bottom: 0; }
-.rulesList li::before { content: counter(rule, decimal-leading-zero); font-family: var(--mono); font-size: 0.64rem; color: var(--muted); padding-top: 3px; grid-row: span 2; }
-.ruleTitle { display: block; font-family: var(--mono); font-size: 0.62rem; font-weight: 400; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+.rules { margin: -14px 0 14px; border-bottom: 1px solid var(--hair); font-size: 0.84rem; }
+.rules summary { display: grid; grid-template-columns: 6.5em 1fr auto; gap: 8px; align-items: baseline; padding: 6px 0; cursor: pointer; list-style: none; }
+.rules summary::-webkit-details-marker { display: none; }
+.rules summary::after { content: "+"; font-family: var(--mono); color: var(--muted); }
+.rules[open] summary::after { content: "−"; }
+.rulesLabel { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.rulesGist { color: var(--muted); min-width: 0; }
+.rules[open] .rulesGist { visibility: hidden; }
+.rulesList { margin: 0; padding: 0 0 0 1.1em; list-style: disc; line-height: 1.45; font-size: 0.86rem; }
+.rulesList li { padding: 2px 0; }
+.rulesList li::marker { color: var(--muted); }
+.rules .rulesList { margin: 0 0 8px; padding-left: calc(6.5em + 8px + 1.1em); }
+@media (max-width: 480px) {
+  .rules summary { grid-template-columns: 1fr auto; }
+  .rulesGist { display: none; }
+  .rules .rulesList { padding-left: 1.1em; }
+}
 
 /* tabs: never wider than the screen; scroll sideways on narrow phones */
 .tabs { max-width: 100%; overflow-x: auto; scrollbar-width: none; }
