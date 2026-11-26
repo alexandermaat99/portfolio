@@ -28,6 +28,7 @@ const limit = (laps: number | null, mins: number | null) =>
 // The phase as of right now (the snapshot can be minutes old).
 export function phaseNow(c: Competition, now: number): Competition["phase"] {
   if (c.practice_start && c.practice_end && c.practice_start <= now && now < c.practice_end) return "practice";
+  if (!c.attack_start || !c.attack_end) return "upcoming"; // dates to be decided
   if (c.attack_start <= now && now < c.attack_end) return "attack";
   if (now >= c.attack_end) return "finished";
   if (c.practice_end && now >= c.practice_end) return "between";
@@ -85,6 +86,10 @@ export function CompeteView({ comps, drivers, now }: { comps: Competition[]; dri
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
 const both = (a: string, b: string, sep: string) => [a, b].filter(Boolean).join(sep);
 
+// Practice happens if it has dates, or (while dates are undecided) if it has a limit set.
+const hasPractice = (c: Competition) =>
+  !!c.practice_start || (!c.attack_start && !!(c.practice_laps || c.practice_minutes));
+
 // "week" / "night" from how long a window is (so a one-night hot lap reads right).
 function span(start: number | null, end: number | null) {
   if (!start || !end) return "";
@@ -101,7 +106,7 @@ function Rules({ c, plain = false }: { c?: Competition; plain?: boolean }) {
   const either = c ? !!(c.practice_laps && c.practice_minutes) : true;
 
   const rules: ReactNode[] = [];
-  if (!c || c.practice_start)
+  if (!c || hasPractice(c))
     rules.push(
       <>
         <b>Practice{c ? span(c.practice_start, c.practice_end) : " week"}:</b>{" "}
@@ -156,7 +161,7 @@ function CompCard({ c, drivers, now }: { c: Competition; drivers: Driver[]; now:
           </div>
         </div>
         <span className={`${s.chip} ${phase === "attack" ? s.chipLive : phase === "practice" ? s.chipGood : ""}`}>
-          {PHASE_LABEL[phase]}
+          {c.attack_start ? PHASE_LABEL[phase] : "Dates TBD"}
         </span>
       </div>
 
@@ -174,6 +179,11 @@ function CompCard({ c, drivers, now }: { c: Competition; drivers: Driver[]; now:
             <>
               <b>{countdown(next[0], now)}</b>
               <span>until {next[1]}</span>
+            </>
+          ) : !c.attack_start ? (
+            <>
+              <b>TBD</b>
+              <span>dates not set yet</span>
             </>
           ) : (
             <>
@@ -195,11 +205,11 @@ function CompCard({ c, drivers, now }: { c: Competition; drivers: Driver[]; now:
             ))}
           </dd>
         </div>
-        {c.practice_start && (
+        {hasPractice(c) && (
           <div>
             <dt>Practice</dt>
             <dd>
-              {when(c.practice_start)} → {when(c.practice_end)} · {limit(c.practice_laps, c.practice_minutes)} each
+              {c.practice_start ? `${when(c.practice_start)} → ${when(c.practice_end)}` : "Dates TBD"} · {limit(c.practice_laps, c.practice_minutes)} each
               {c.practice_bonus_laps || c.practice_bonus_minutes
                 ? ` · first time on the sim: ${both(c.practice_bonus_laps ? `+${c.practice_bonus_laps} laps` : "", c.practice_bonus_minutes ? `+${c.practice_bonus_minutes} min` : "", " / ")}`
                 : ""}
@@ -209,7 +219,7 @@ function CompCard({ c, drivers, now }: { c: Competition; drivers: Driver[]; now:
         <div>
           <dt>Hot lap</dt>
           <dd>
-            {when(c.attack_start)} → {when(c.attack_end)} · {limit(c.attack_laps, c.attack_minutes)} each
+            {c.attack_start ? `${when(c.attack_start)} → ${when(c.attack_end)}` : "Dates TBD"} · {limit(c.attack_laps, c.attack_minutes)} each
             {c.attack_warmup_laps ? ` + ${plural(c.attack_warmup_laps, "warm-up lap")} per visit` : ""}, best clean lap counts
           </dd>
         </div>
