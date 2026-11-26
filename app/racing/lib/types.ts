@@ -103,6 +103,9 @@ export interface CompetitionRow {
   practice_laps_used: number;
   practice_seconds_used: number;
   practice_over: boolean;
+  rookie?: boolean; // first time on the sim: gets the practice bonus
+  practice_laps_limit?: number | null;
+  practice_minutes_limit?: number | null;
 }
 
 export interface Competition {
@@ -118,6 +121,8 @@ export interface Competition {
   practice_end: number | null;
   practice_laps: number | null;
   practice_minutes: number | null;
+  practice_bonus_laps?: number | null; // extra practice for first-timers
+  practice_bonus_minutes?: number | null;
   attack_start: number;
   attack_end: number;
   attack_laps: number | null;

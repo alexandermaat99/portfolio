@@ -10,7 +10,7 @@ const PHASE_LABEL: Record<Competition["phase"], string> = {
   upcoming: "Not started",
   practice: "Practice",
   between: "Practice closed",
-  attack: "Time attack",
+  attack: "Hot lap",
   finished: "Finished",
 };
 
@@ -43,7 +43,7 @@ function countdown(ts: number, now: number) {
 function nextDeadline(c: Competition, now: number): [number, string] | null {
   const marks: [number | null, string][] = [
     [c.practice_start, "practice opens"], [c.practice_end, "practice closes"],
-    [c.attack_start, "time attack opens"], [c.attack_end, "time attack closes"],
+    [c.attack_start, "hot lap opens"], [c.attack_end, "hot lap closes"],
   ];
   const next = marks.filter(([t]) => t && t > now).sort((a, b) => (a[0] as number) - (b[0] as number))[0];
   return next ? [next[0] as number, next[1]] : null;
@@ -80,31 +80,45 @@ export function CompeteView({ comps, drivers, now }: { comps: Competition[]; dri
 // The rules, short (drivers are smart), filled in from the competition's settings. The
 // card above already shows track, cars, dates and money, so this is just the mechanics.
 // Keep in step with SimStats' competition.py: that's what actually scores it.
-function attempts(laps: number | null, mins: number | null) {
-  if (laps && mins) return `${laps} attempts (or ${mins} min)`;
-  if (laps) return `${laps} attempt${laps === 1 ? "" : "s"}`;
-  if (mins) return `${mins} min of laps`;
-  return null;
-}
+// The rules: only what isn't obvious. Track, cars, dates and money are on the card.
+// Keep in step with SimStats' competition.py: that's what actually scores it.
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
+const both = (a: string, b: string, sep: string) => [a, b].filter(Boolean).join(sep);
+
+// "week" / "night" from how long a window is (so a one-night hot lap reads right).
+function span(start: number | null, end: number | null) {
+  if (!start || !end) return "";
+  const days = (end - start) / 86400;
+  return days <= 1.5 ? " night" : days >= 5 && days <= 9 ? " week" : "";
+}
 
 function Rules({ c, plain = false }: { c?: Competition; plain?: boolean }) {
-  const tries = c ? attempts(c.attack_laps, c.attack_minutes) : "first few laps";
-  const cap = c ? [c.practice_laps ? plural(c.practice_laps, "lap") : "", c.practice_minutes ? `${c.practice_minutes} min` : ""].filter(Boolean).join(" or ") : null;
   const warmups = c?.attack_warmup_laps ?? 0;
-  const split = c?.payouts.length ? c.payouts.map((p) => p.percent).join("/") : null;
-  const rules: ReactNode[] = [
-    <>Only the set track in an allowed car counts. Anything else is ignored.</>,
-    <>Practice never counts{cap ? <> (cap: {cap})</> : null}.</>,
-    !c ? <>Time attack: a few attempts each, plus any free warm-up laps each time you get in.</>
-      : <>Time attack: <b>{tries ?? "unlimited attempts"}</b> in an allowed car.{" "}
-          {warmups ? <>Each time you get in, your first <b>{plural(warmups, "lap")}</b> {warmups === 1 ? "is a free warm-up" : "are free warm-ups"}.</> : <>No warm-ups: your first laps are your attempts.</>}</>,
-    <>Out-laps, in-laps and partial laps are free.</>,
-    <>Clean laps only: no incidents, off-tracks, pit lane or resets. A dirty lap still uses an attempt.</>,
-    <>Fastest counted lap wins. Ties go to whoever set it first.</>,
-    <>Pool is paid out {split ? <>{split}</> : "by the split"} when the time attack closes.</>,
-    <>Be the selected driver before you leave the pits. Anything else is the organizer&apos;s call.</>,
-  ];
+  const shots = c ? both(c.attack_laps ? plural(c.attack_laps, "shot") : "", c.attack_minutes ? `${c.attack_minutes} min` : "", " or ") || "unlimited shots" : "a few shots";
+  const lead = c ? `1 out-lap${warmups ? ` + ${plural(warmups, "warm-up")}` : ""}` : "an out-lap and a couple of warm-ups";
+  const practice = c ? both(c.practice_laps ? plural(c.practice_laps, "lap") : "", c.practice_minutes ? `${c.practice_minutes} min` : "", " or ") : "";
+  const bonus = c ? both(c.practice_bonus_laps ? `+${plural(c.practice_bonus_laps, "lap")}` : "", c.practice_bonus_minutes ? `+${c.practice_bonus_minutes} min` : "", " / ") : "extra";
+  const either = c ? !!(c.practice_laps && c.practice_minutes) : true;
+
+  const rules: ReactNode[] = [];
+  if (!c || c.practice_start)
+    rules.push(
+      <>
+        <b>Practice{c ? span(c.practice_start, c.practice_end) : " week"}:</b>{" "}
+        {practice ? <>up to {practice}{either ? ", whichever comes first" : ""}.</> : c ? <>as much as you like.</> : <>a set number of laps or minutes, whichever comes first.</>}
+        {bonus && <> First time on the sim? {c ? <b>{bonus}</b> : "Extra practice"}{c ? " more" : ""}.</>}
+      </>,
+    );
+  rules.push(
+    <>
+      <b>Hot lap{c ? span(c.attack_start, c.attack_end) : " week (or one night together)"}:</b> each time you get in, {lead}{" "}
+      {warmups || !c ? "are" : "is"} free. Then <b>{shots}</b>; your best clean one counts.
+    </>,
+    <>An incident or off-track still uses up the shot.</>,
+    <>Ties go to whoever set the time first.</>,
+    <>Make sure you&apos;re selected as the driver before heading out.</>,
+  );
+
   const list = (
     <ul className={s.rulesList}>
       {rules.map((r, i) => (
@@ -117,7 +131,7 @@ function Rules({ c, plain = false }: { c?: Competition; plain?: boolean }) {
     <details className={s.rules}>
       <summary>
         <span className={s.rulesLabel}>Rules</span>
-        <span className={s.rulesGist}>{tries ?? "unlimited attempts"} · {warmups ? `${plural(warmups, "warm-up")} per visit` : "no warm-ups"} · clean laps only</span>
+        <span className={s.rulesGist}>{lead} · {shots} · best clean lap</span>
       </summary>
       {list}
     </details>
@@ -187,11 +201,14 @@ function CompCard({ c, drivers, now }: { c: Competition; drivers: Driver[]; now:
             <dt>Practice</dt>
             <dd>
               {when(c.practice_start)} → {when(c.practice_end)} · {limit(c.practice_laps, c.practice_minutes)} each
+              {c.practice_bonus_laps || c.practice_bonus_minutes
+                ? ` · first time on the sim: ${both(c.practice_bonus_laps ? `+${c.practice_bonus_laps} laps` : "", c.practice_bonus_minutes ? `+${c.practice_bonus_minutes} min` : "", " / ")}`
+                : ""}
             </dd>
           </div>
         )}
         <div>
-          <dt>Time attack</dt>
+          <dt>Hot lap</dt>
           <dd>
             {when(c.attack_start)} → {when(c.attack_end)} · {limit(c.attack_laps, c.attack_minutes)} each
             {c.attack_warmup_laps ? ` + ${plural(c.attack_warmup_laps, "warm-up lap")} per visit` : ""}, best clean lap counts
@@ -244,7 +261,8 @@ function CompCard({ c, drivers, now }: { c: Competition; drivers: Driver[]; now:
                     <>
                       <td className={s.muted}>
                         {r.practice_laps_used}
-                        {c.practice_laps ? `/${c.practice_laps}` : ""} laps
+                        {(r.practice_laps_limit ?? c.practice_laps) ? `/${r.practice_laps_limit ?? c.practice_laps}` : ""} laps
+                        {r.rookie && <span className={s.chip} style={{ marginLeft: 6 } as CSSProperties} title="First time on the sim: extra practice">new</span>}
                       </td>
                       <td className={s.muted}>{Math.round(r.practice_seconds_used / 60)}m</td>
                     </>
