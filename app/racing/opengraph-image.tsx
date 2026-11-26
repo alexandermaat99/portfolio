@@ -1,5 +1,7 @@
 // app/racing/opengraph-image.tsx: the link preview for /racing and its tabs (without one,
 // iMessage etc. grab the first big picture on the page, which is a driver's photo).
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { ImageResponse } from "next/og";
 
 export const alt = "SimStats: sim racing leaderboard";
@@ -10,29 +12,18 @@ const INK = "#ececE6";
 const MUTED = "#8d8d86";
 const ACCENT = "#ff4f00";
 
-// The page's own fonts, fetched as TTF from Google Fonts (only the glyphs we use).
-async function googleFont(family: string, weight: number, text: string): Promise<ArrayBuffer> {
-  const url = `https://fonts.googleapis.com/css2?family=${family.replace(/ /g, "+")}:wght@${weight}&text=${encodeURIComponent(text)}`;
-  const css = await (await fetch(url)).text();
-  const src = css.match(/src: url\((.+?)\) format\('(opentype|truetype)'\)/);
-  if (!src) throw new Error(`font ${family} not found`);
-  return (await fetch(src[1])).arrayBuffer();
-}
+// The page's own fonts, bundled in og-fonts/ (OFL) so the build never depends on the
+// network: Google Fonts not answering once failed a Vercel deploy.
+const font = (file: string) => readFile(join(process.cwd(), "app/racing/og-fonts", file));
 
 const WORDMARK = "SIMSTATS";
-const TEXT = "SS-1LIVE LEADERBOARDSim racing nightsEvery lap, recorded straight from iRacing.alexandermaat.com/racing";
 
 export default async function RacingOgImage() {
-  let fonts: { name: string; data: ArrayBuffer; weight: 400 | 700 }[] = [];
-  try {
-    fonts = [
-      { name: "Syncopate", data: await googleFont("Syncopate", 700, WORDMARK), weight: 700 },
-      { name: "Space Mono", data: await googleFont("Space Mono", 400, TEXT), weight: 400 },
-      { name: "Space Mono", data: await googleFont("Space Mono", 700, TEXT), weight: 700 },
-    ];
-  } catch {
-    fonts = []; // fall back to the default font rather than failing the preview
-  }
+  const fonts = [
+    { name: "Syncopate", data: await font("syncopate-700.ttf"), weight: 700 as const },
+    { name: "Space Mono", data: await font("space-mono-400.ttf"), weight: 400 as const },
+    { name: "Space Mono", data: await font("space-mono-700.ttf"), weight: 700 as const },
+  ];
   return new ImageResponse(
     (
       <div
