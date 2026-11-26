@@ -3,7 +3,7 @@ import { useState, type FormEvent } from "react";
 import s from "../racing.module.css";
 import a from "./admin.module.css";
 
-export default function Login({ configured }: { configured: boolean }) {
+export default function Login({ problem }: { problem: string | null }) {
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const submit = async (e: FormEvent<HTMLFormElement>) => {
@@ -25,14 +25,14 @@ export default function Login({ configured }: { configured: boolean }) {
       <main className={s.main}>
         <section className={`${s.card} ${a.login}`}>
           <h2 className={s.cardTitle}><span>SimStats admin</span></h2>
-          {configured ? (
+          {!problem ? (
             <form className={a.form} onSubmit={submit}>
               <label>Password<input type="password" name="password" autoComplete="current-password" autoFocus required /></label>
               <button className={`${a.btn} ${a.primary}`} disabled={busy}>Log in</button>
               {err && <div className={a.bad}>{err}</div>}
             </form>
           ) : (
-            <div className={s.muted}>Admin isn&apos;t set up yet.</div>
+            <div className={s.muted}>{problem}</div>
           )}
         </section>
       </main>
