@@ -33,8 +33,8 @@ export async function POST(req: Request) {
   }
   const kind = parsed.kind;
   if (kind === "photo") return ingestPhoto(parsed.payload);
-  if ((kind !== "live" && kind !== "data") || typeof parsed.payload !== "object" || !parsed.payload) {
-    return Response.json({ error: "Expected {kind: 'live'|'data', payload: {...}}" }, { status: 400 });
+  if ((kind !== "live" && kind !== "data" && kind !== "admin") || typeof parsed.payload !== "object" || !parsed.payload) {
+    return Response.json({ error: "Expected {kind: 'live'|'data'|'admin', payload: {...}}" }, { status: 400 });
   }
   try {
     await saveSnapshot(kind as SnapshotKind, JSON.stringify(parsed.payload));
