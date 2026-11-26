@@ -111,7 +111,7 @@ function Rules({ c, plain = false }: { c?: Competition; plain?: boolean }) {
       <>
         <b>Practice{c ? span(c.practice_start, c.practice_end) : " week"}:</b>{" "}
         {practice ? <>up to {practice}{either ? ", whichever comes first" : ""}.</> : c ? <>as much as you like.</> : <>a set number of laps or minutes, whichever comes first.</>}
-        {bonus && <> First time on the sim? {c ? <b>{bonus}</b> : "Extra practice"}{c ? " more" : ""}.</>}
+        {bonus && <> New to the sim? {c ? <b>{bonus}</b> : "Extra practice"}{c ? " more" : ""}.</>}
       </>,
     );
   rules.push(
@@ -211,7 +211,7 @@ function CompCard({ c, drivers, now }: { c: Competition; drivers: Driver[]; now:
             <dd>
               {c.practice_start ? `${when(c.practice_start)} → ${when(c.practice_end)}` : "Dates TBD"} · {limit(c.practice_laps, c.practice_minutes)} each
               {c.practice_bonus_laps || c.practice_bonus_minutes
-                ? ` · first time on the sim: ${both(c.practice_bonus_laps ? `+${c.practice_bonus_laps} laps` : "", c.practice_bonus_minutes ? `+${c.practice_bonus_minutes} min` : "", " / ")}`
+                ? ` · beginners: ${both(c.practice_bonus_laps ? `+${c.practice_bonus_laps} laps` : "", c.practice_bonus_minutes ? `+${c.practice_bonus_minutes} min` : "", " / ")}`
                 : ""}
             </dd>
           </div>
@@ -273,7 +273,7 @@ function CompCard({ c, drivers, now }: { c: Competition; drivers: Driver[]; now:
                       <td className={s.muted}>
                         {r.practice_laps_used}
                         {(r.practice_laps_limit ?? c.practice_laps) ? `/${r.practice_laps_limit ?? c.practice_laps}` : ""} laps
-                        {r.rookie && <span className={s.chip} style={{ marginLeft: 6 } as CSSProperties} title="First time on the sim: extra practice">new</span>}
+                        {r.rookie && <span className={s.chip} style={{ marginLeft: 6 } as CSSProperties} title="Beginner: extra practice">new</span>}
                       </td>
                       <td className={s.muted}>{Math.round(r.practice_seconds_used / 60)}m</td>
                     </>
