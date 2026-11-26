@@ -16,8 +16,18 @@ function same(a: string, b: string): boolean {
   return x.length === y.length && timingSafeEqual(x, y);
 }
 
+export const MIN_PASSWORD = 12;
+
 export function adminConfigured(): boolean {
-  return secret().length >= 12;
+  return secret().length >= MIN_PASSWORD;
+}
+
+/** Why admin is off, for the login page (never reveals the password itself). */
+export function adminProblem(): string | null {
+  if (!secret()) return "Admin isn't set up yet (RACING_ADMIN_PASSWORD isn't set in Vercel).";
+  if (secret().length < MIN_PASSWORD)
+    return `The admin password in Vercel (RACING_ADMIN_PASSWORD) is too short: use at least ${MIN_PASSWORD} characters, then redeploy.`;
+  return null;
 }
 
 export function passwordOk(given: unknown): boolean {
