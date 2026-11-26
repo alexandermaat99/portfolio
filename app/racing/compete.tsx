@@ -121,6 +121,7 @@ function Rules({ c, plain = false }: { c?: Competition; plain?: boolean }) {
     </>,
     <>An incident or off-track still uses up the shot.</>,
     <>Tied? No tie-break: both get another shot.</>,
+    <>Shoes off in the house. Shoes on the sim are optional.</>,
   );
 
   const list = (
