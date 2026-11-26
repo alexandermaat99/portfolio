@@ -126,8 +126,8 @@ export interface Competition {
   practice_minutes: number | null;
   practice_bonus_laps?: number | null; // extra practice for first-timers
   practice_bonus_minutes?: number | null;
-  attack_start: number;
-  attack_end: number;
+  attack_start: number | null; // null until the dates are decided
+  attack_end: number | null;
   attack_laps: number | null;
   attack_minutes: number | null;
   attack_warmup_laps?: number; // free laps at the start of each visit
