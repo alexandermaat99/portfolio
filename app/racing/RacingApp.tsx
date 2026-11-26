@@ -189,9 +189,7 @@ export default function RacingApp({ initial, initialTab = "live" }: { initial: R
 
       <main className={s.main}>
         <p className={s.intro}>
-          Lap times from hot-seat iRacing nights at my place. Friends take turns in one sim rig, and{" "}
-          <b>SimStats</b>, an app I built, reads the sim&apos;s telemetry to record every lap, who drove
-          it, and whether it was clean. New laps pop up here as they&apos;re set.
+          iRacing nights at my place, timed by <b>SimStats</b>.
         </p>
 
         {data?.local_url && (

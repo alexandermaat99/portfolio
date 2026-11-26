@@ -103,6 +103,9 @@ export interface CompetitionRow {
   practice_laps_used: number;
   practice_seconds_used: number;
   practice_over: boolean;
+  tie?: boolean; // shares its position: both get another shot
+  extra_shots?: number;
+  attack_laps_limit?: number | null; // this driver's shots (incl. extra ones)
   rookie?: boolean; // first time on the sim: gets the practice bonus
   practice_laps_limit?: number | null;
   practice_minutes_limit?: number | null;
