@@ -115,8 +115,7 @@ function Rules({ c, plain = false }: { c?: Competition; plain?: boolean }) {
       {warmups || !c ? "are" : "is"} free. Then <b>{shots}</b>; your best clean one counts.
     </>,
     <>An incident or off-track still uses up the shot.</>,
-    <>Ties go to whoever set the time first.</>,
-    <>Make sure you&apos;re selected as the driver before heading out.</>,
+    <>Tied? No tie-break: both get another shot.</>,
   );
 
   const list = (
@@ -233,7 +232,9 @@ function CompCard({ c, drivers, now }: { c: Competition; drivers: Driver[]; now:
               const d = driverOf(r.driver_id);
               return (
                 <tr key={r.driver_id} className={r.pos === 1 && attack ? s.p1 : ""}>
-                  <td className={s.pos}>{attack && r.pos ? r.pos : "–"}</td>
+                  <td className={s.pos} title={attack && r.tie ? "Tied: both get another shot" : undefined}>
+                    {attack && r.pos ? `${r.tie ? "T" : ""}${r.pos}` : "–"}
+                  </td>
                   <td className={s.name}>
                     <span className={s.nameInner}>
                       <Avatar driver={d} size="sm" />
@@ -253,7 +254,7 @@ function CompCard({ c, drivers, now }: { c: Competition; drivers: Driver[]; now:
                       <td className={`${s.muted} ${s.hideSm}`}>{r.gap == null ? "" : r.gap === 0 ? "—" : `+${r.gap.toFixed(3)}`}</td>
                       <td className={s.muted}>
                         {r.attack_laps_used}
-                        {c.attack_laps ? `/${c.attack_laps}` : ""}
+                        {(r.attack_laps_limit ?? c.attack_laps) ? `/${r.attack_laps_limit ?? c.attack_laps}` : ""}
                         {r.attack_laps_over > 0 && <span className={`${s.chip} ${s.chipBad}`} style={{ marginLeft: 6 } as CSSProperties}>+{r.attack_laps_over}</span>}
                       </td>
                     </>
