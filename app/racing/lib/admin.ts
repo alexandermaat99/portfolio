@@ -112,6 +112,26 @@ const EMPTY_FIELDS: CompFields = {
   attack_start: null, attack_end: null, attack_laps: 3, attack_minutes: null, attack_warmup_laps: 2,
 };
 
+/** Before the PC has sent its private copy (it needs updating first), start from the
+ *  public data: same drivers and competitions, just without emails or who's paid. */
+export function fallbackAdmin(data: RacingData | null): AdminSnapshot | null {
+  if (!data) return null;
+  return {
+    updated_at: 0,
+    drivers: data.drivers.map((d) => ({
+      id: d.id, name: d.name, nickname: d.nickname ?? null, color: d.color, archived: d.archived ?? 0,
+      email: null, marked_new: false, beginner: false,
+    })),
+    competitions: (data.competitions ?? []).map((c) => ({
+      ...EMPTY_FIELDS,
+      ...Object.fromEntries(COMP_FIELDS.filter((k) => k in c).map((k) => [k, (c as unknown as Record<string, unknown>)[k]])),
+      payout: c.payouts.map((p) => p.percent).join("/") || "100",
+      id: c.id, archived: 0, phase: c.phase,
+      entrants: c.standings.map((r) => ({ driver_id: r.driver_id, paid: false, extra_shots: r.extra_shots ?? 0 })),
+    })),
+  };
+}
+
 export function buildView(admin: AdminSnapshot | null, ops: AdminOp[]): AdminView {
   const drivers = new Map<string, ViewDriver>();
   for (const d of admin?.drivers ?? []) {
@@ -186,6 +206,7 @@ function parsePayout(text: string): number[] {
 
 /** Public data with pending changes shown (no emails, no paid list: same as SimStats publishes). */
 export function overlayPublic(data: RacingData | null, admin: AdminSnapshot | null, ops: AdminOp[]): RacingData | null {
+  admin = admin ?? fallbackAdmin(data);
   if (!data || !ops.length || !admin) return data;
   const view = buildView(admin, ops);
   const publicId = new Map<string, number>();

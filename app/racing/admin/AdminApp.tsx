@@ -75,8 +75,17 @@ export default function AdminApp({ initial }: { initial: AdminState }) {
       <main className={s.main}>
         <section className={`${s.card} ${a.status}`}>
           <div>
-            <b>Sim PC last synced {ago(st.synced_at)}.</b>{" "}
-            <span className={s.muted}>Changes here show on the site right away and reach the PC the next time it&apos;s on.</span>
+            {st.pc_ready ? (
+              <>
+                <b>Sim PC last synced {ago(st.synced_at)}.</b>{" "}
+                <span className={s.muted}>Changes here show on the site right away and reach the PC the next time it&apos;s on.</span>
+              </>
+            ) : (
+              <>
+                <b>The sim PC hasn&apos;t synced with this page yet</b>{" "}
+                <span className={s.muted}>(it needs one update at home). Changes show on the site right away and wait for the PC. Emails and paid status already saved on the PC show up after it syncs.</span>
+              </>
+            )}
           </div>
           {st.pending.length > 0 && (
             <ul className={a.pending}>
@@ -104,7 +113,7 @@ export default function AdminApp({ initial }: { initial: AdminState }) {
           <section className={s.card}>
             <h2 className={s.cardTitle}><span>Drivers</span><span className={s.small}>{drivers.length}</span></h2>
             <ul className={a.list}>
-              {drivers.map((d) => <DriverRow key={d.key} d={d} busy={busy} send={send} />)}
+              {drivers.map((d) => <DriverRow key={d.key} d={d} busy={busy} send={send} pcReady={st.pc_ready} />)}
             </ul>
             {removed.length > 0 && (
               <details className={a.removed}>
@@ -146,17 +155,21 @@ export default function AdminApp({ initial }: { initial: AdminState }) {
 
 // -- drivers ---------------------------------------------------------------------------
 
-function DriverRow({ d, busy, send }: { d: ViewDriver; busy: boolean; send: (op: OpInput) => Promise<boolean> }) {
+function DriverRow({ d, busy, send, pcReady }: { d: ViewDriver; busy: boolean; send: (op: OpInput) => Promise<boolean>; pcReady: boolean }) {
   const [open, setOpen] = useState(false);
   const save = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const f = new FormData(e.currentTarget);
-    const ok = await send({
-      type: "driver.edit", driver: refOf(d.key),
-      nickname: String(f.get("nickname") || "").trim(), name: String(f.get("name") || "").trim(),
-      email: String(f.get("email") || "").trim(), beginner: f.get("beginner") === "on",
-    });
-    if (ok) setOpen(false);
+    // Only send what changed, so nothing the page can't see (e.g. an email saved on the PC) is overwritten.
+    const op: OpInput = { type: "driver.edit", driver: refOf(d.key) };
+    const nickname = String(f.get("nickname") || "").trim(), name = String(f.get("name") || "").trim();
+    const email = String(f.get("email") || "").trim(), beginner = f.get("beginner") === "on";
+    if (nickname !== (d.nickname || "")) op.nickname = nickname;
+    if (name !== d.name) op.name = name;
+    if (email !== (d.email || "")) op.email = email;
+    if (beginner !== d.marked_new) op.beginner = beginner;
+    if (Object.keys(op).length === 2) return setOpen(false); // nothing changed
+    if (await send(op)) setOpen(false);
   };
   return (
     <li className={a.driver} style={{ "--c": d.color } as CSSProperties}>
@@ -166,7 +179,7 @@ function DriverRow({ d, busy, send }: { d: ViewDriver; busy: boolean; send: (op:
           <b>{d.nickname || d.name}</b> <span className={s.muted}>{d.nickname ? d.name : ""}</span>
           {d.pending && <span className={s.chip}>waiting</span>}
           {d.beginner && <span className={s.chip}>beginner</span>}
-          <span className={a.email}>{d.email || "no email"}</span>
+          <span className={a.email}>{d.email || (pcReady || d.id == null ? "no email" : "email: after the PC syncs")}</span>
         </span>
         <button className={a.linkBtn} onClick={() => setOpen(!open)}>{open ? "Close" : "Edit"}</button>
       </div>
