@@ -8,6 +8,7 @@ import s from "../racing.module.css";
 import a from "./admin.module.css";
 import { refOf, type CompFields, type OpInput, type ViewComp, type ViewDriver } from "../lib/admin";
 import type { AdminState } from "../lib/admin-state";
+import ScheduleAdmin from "./ScheduleAdmin";
 
 const GT3_CARS = ["Mercedes-AMG GT3 2020", "Porsche 911 GT3 R (992)", "Ferrari 296 GT3",
   "Audi R8 LMS EVO II GT3", "Ford Mustang GT3", "McLaren 720S GT3 EVO"];
@@ -167,6 +168,8 @@ export default function AdminApp({ initial }: { initial: AdminState }) {
             ) : (
               <button className={`${a.btn} ${a.primary}`} onClick={() => setEditingComp("new")}>New competition</button>
             )}
+            <div style={{ height: 16 }} />
+            <ScheduleAdmin />
           </section>
         </div>
       </main>
@@ -385,7 +388,7 @@ function CompForm({ comp, st, busy, onSave, onCancel }: {
             <label>Minutes<input name="practice_minutes" inputMode="numeric" defaultValue={f?.practice_minutes ?? ""} /></label>
           </div>
           <div className={a.inline}>
-            <label>Beginners: + laps<input name="practice_bonus_laps" inputMode="numeric" defaultValue={f ? f.practice_bonus_laps ?? "" : 20} /></label>
+            <label>Beginners: + laps<input name="practice_bonus_laps" inputMode="numeric" defaultValue={f ? f.practice_bonus_laps ?? "" : ""} placeholder="none" /></label>
             <label>+ minutes<input name="practice_bonus_minutes" inputMode="numeric" defaultValue={f?.practice_bonus_minutes ?? ""} /></label>
           </div>
         </fieldset>

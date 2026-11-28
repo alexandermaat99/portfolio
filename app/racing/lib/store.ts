@@ -154,3 +154,42 @@ export async function saveQueueResult(result: QueueResult): Promise<void> {
   if (redisConfig()) await redis(["SET", QUEUE_RESULT, JSON.stringify(result)]);
   else memory.set(QUEUE_RESULT, JSON.stringify(result));
 }
+
+// -- small hash helpers (used by the practice schedule) ------------------------------------
+
+function memHash(key: string): Record<string, string> {
+  return parse<Record<string, string>>(memory.get(key)) ?? {};
+}
+
+export async function hashAll(key: string): Promise<Record<string, string>> {
+  if (!redisConfig()) return memHash(key);
+  const flat = ((await redis(["HGETALL", key])) as string[] | null) ?? [];
+  const out: Record<string, string> = {};
+  for (let i = 0; i + 1 < flat.length; i += 2) out[flat[i]] = flat[i + 1];
+  return out;
+}
+
+export async function hashSet(key: string, field: string, value: string): Promise<void> {
+  if (redisConfig()) await redis(["HSET", key, field, value]);
+  else if (process.env.NODE_ENV !== "production") memory.set(key, JSON.stringify({ ...memHash(key), [field]: value }));
+  else throw new Error("Storage not configured");
+}
+
+/** Set only if the field is free; true if it was set (used to claim a slot atomically). */
+export async function hashSetNew(key: string, field: string, value: string): Promise<boolean> {
+  if (redisConfig()) return Number(await redis(["HSETNX", key, field, value])) === 1;
+  const h = memHash(key);
+  if (field in h) return false;
+  memory.set(key, JSON.stringify({ ...h, [field]: value }));
+  return true;
+}
+
+export async function hashDel(key: string, ...fields: string[]): Promise<void> {
+  if (!fields.length) return;
+  if (redisConfig()) await redis(["HDEL", key, ...fields]);
+  else {
+    const h = memHash(key);
+    for (const f of fields) delete h[f];
+    memory.set(key, JSON.stringify(h));
+  }
+}
