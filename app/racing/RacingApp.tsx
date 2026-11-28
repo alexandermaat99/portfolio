@@ -232,7 +232,7 @@ export default function RacingApp({ initial, initialTab = "live" }: { initial: R
         ) : tab === "cars" ? (
           <CarsView />
         ) : tab === "schedule" ? (
-          <ScheduleView drivers={data.drivers} />
+          <ScheduleView drivers={data.drivers} comps={comps} />
         ) : tab === "compete" ? (
           <CompeteView comps={comps} drivers={data.drivers} now={snap.now} />
         ) : (

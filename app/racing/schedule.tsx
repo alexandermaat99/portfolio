@@ -6,7 +6,7 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import s from "./racing.module.css";
 import c from "./schedule.module.css";
-import type { Driver } from "./lib/types";
+import type { Competition, Driver } from "./lib/types";
 
 interface Win { id: string; start: number; end: number }
 interface Booking { id: string; start: number; end: number; name: string; driver_id: number | null }
@@ -27,7 +27,7 @@ async function post(path: string, body: unknown) {
   return json;
 }
 
-export function ScheduleView({ drivers }: { drivers: Driver[] }) {
+export function ScheduleView({ drivers, comps = [] }: { drivers: Driver[]; comps?: Competition[] }) {
   const [sched, setSched] = useState<Sched | null>(null);
   const [mine, setMine] = useState<Record<string, string>>({});
   const [picking, setPicking] = useState<number | null>(null); // slot start being booked
@@ -46,7 +46,11 @@ export function ScheduleView({ drivers }: { drivers: Driver[] }) {
     return () => { alive = false; clearInterval(t); };
   }, []);
 
-  const active = drivers.filter((d) => !d.archived);
+  // Practice is for the competition: offer its entrants (anyone else can type their name).
+  const now0 = Date.now() / 1000;
+  const entrantIds = new Set(comps.filter((c) => !c.attack_end || c.attack_end > now0).flatMap((c) => c.standings.map((r) => r.driver_id)));
+  const active = drivers.filter((d) => !d.archived && (!entrantIds.size || entrantIds.has(d.id)))
+    .sort((x, y) => (x.nickname || x.name).localeCompare(y.nickname || y.name));
   const nick = (d: Driver) => d.nickname || d.name;
 
   const doBook = async (start: number) => {
