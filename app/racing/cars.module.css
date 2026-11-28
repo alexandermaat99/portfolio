@@ -8,8 +8,8 @@
 .card:hover { border-color: var(--muted); }
 .pinned { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
 .head { display: flex; gap: 12px; align-items: center; }
-.logo { font-size: 1.9rem; display: inline-flex; width: 44px; height: 44px; align-items: center; justify-content: center;
-  border: 1px solid var(--line); border-radius: 6px; flex: none; }
+.logo { display: inline-flex; width: 64px; height: 44px; align-items: center; justify-content: center; flex: none; }
+.logo > span { width: 64px !important; height: 40px !important; margin: 0 !important; vertical-align: middle !important; }
 .name { font-weight: 700; font-size: 1rem; line-height: 1.25; }
 .vibe { margin: 0; font-size: 0.86rem; line-height: 1.45; color: var(--muted); }
 .bars { display: flex; flex-direction: column; gap: 8px; }
@@ -28,3 +28,12 @@
 .trackName { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .record { color: var(--record); font-weight: 700; }
 .othersTitle { margin-top: 6px; }
+
+.section { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink);
+  border-top: 1px solid var(--hair); padding-top: 8px; }
+.rating { display: grid; grid-template-columns: 6.5em 1fr 3.4em; align-items: center; gap: 8px; }
+.pips { display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px; }
+.pips i { height: 8px; border-radius: 2px; background: var(--hair); position: relative; }
+.pips i.pipOn { background: var(--accent); }
+.pips i.pipCmp { box-shadow: 0 0 0 1.5px var(--ink); }
+.rating .barValue { text-align: right; }

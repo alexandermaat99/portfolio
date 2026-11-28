@@ -6,7 +6,7 @@
 import { useState, type CSSProperties } from "react";
 import s from "./racing.module.css";
 import c from "./cars.module.css";
-import { GT3_LINEUP, type CarSpec } from "./lib/cars";
+import { GT3_LINEUP, RATING_LABELS, type CarSpec, type Ratings } from "./lib/cars";
 import type { CarStat, RacingData } from "./lib/types";
 import { BrandLogo, DriverName, TrackIcon } from "./visuals";
 
@@ -58,6 +58,7 @@ export function CarsView({ data }: { data: RacingData }) {
     .map((x) => ({ name: x.car, engine: "", layout: "Front-engine", drivetrain: "", vibe: "" }));
   const [pinned, setPinned] = useState<string | null>(null);
   const pinnedBars = pinned ? bars(stats.find((x) => x.car === pinned), maxLaps) : null;
+  const pinnedRatings = pinned ? GT3_LINEUP.find((g) => g.name === pinned)?.ratings : undefined;
   const driverOf = (id: number | null) => data.drivers.find((d) => d.id === id);
 
   const card = (spec: CarSpec, owned: boolean) => {
@@ -76,7 +77,18 @@ export function CarsView({ data }: { data: RacingData }) {
           </div>
         </div>
         {spec.vibe && <p className={c.vibe}>{spec.vibe}</p>}
+        {spec.ratings && (
+          <div className={c.bars}>
+            <div className={c.section} title="How the car tends to feel, out of 10. Not measured: iRacing balances GT3s to be close on pace.">
+              Character <span className={s.muted}>· our take</span>
+            </div>
+            {(Object.keys(RATING_LABELS) as (keyof Ratings)[]).map((k) => (
+              <Rating key={k} label={RATING_LABELS[k]} value={spec.ratings![k]} cmp={!isPinned ? pinnedRatings?.[k] : undefined} />
+            ))}
+          </div>
+        )}
         <div className={c.bars}>
+          <div className={c.section}>From our laps</div>
           <Bar label="Pace" value={b.pace} cmp={!isPinned ? pinnedBars?.pace : undefined}
             note={b.gapPct == null ? "no clean laps yet" : b.gapPct < 0.005 ? "holds track records" : `avg ${b.gapPct.toFixed(1)}% off records`} />
           <Bar label="Clean" value={hasCounts ? b.clean : null} cmp={!isPinned ? pinnedBars?.clean : undefined}
@@ -107,8 +119,9 @@ export function CarsView({ data }: { data: RacingData }) {
   return (
     <>
       <p className={`${s.small} ${s.muted} ${c.intro}`}>
-        The GT3s on the rig. Bars come from our own laps: <b>Pace</b> is how close the car&apos;s best laps are to the track
-        records, <b>Clean</b> is the share of clean laps driven in it, <b>Popularity</b> is how much it&apos;s been driven.
+        The GT3s on the rig. <b>Character</b> is our take on how each one feels, out of 10 (iRacing balances GT3s, so
+        lap times end up close). <b>From our laps</b> is measured: <b>Pace</b> is how close the car&apos;s best laps are to the
+        track records, <b>Clean</b> is the share of clean laps driven in it, <b>Popularity</b> is how much it&apos;s been driven.
         {pinned ? <> Comparing everything against the <b>{pinned}</b> (tap it again to stop).</> : <> Tap a car to compare the rest against it.</>}
       </p>
       <div className={c.grid}>{GT3_LINEUP.map((g) => card(g, true))}</div>
@@ -119,6 +132,24 @@ export function CarsView({ data }: { data: RacingData }) {
         </>
       )}
     </>
+  );
+}
+
+function Rating({ label, value, cmp }: { label: string; value: number; cmp?: number }) {
+  const diff = cmp != null ? value - cmp : 0;
+  return (
+    <div className={c.rating}>
+      <span className={c.barLabel}>{label}</span>
+      <span className={c.pips} aria-label={`${value} out of 10`}>
+        {Array.from({ length: 10 }, (_, i) => (
+          <i key={i} className={`${i < value ? c.pipOn : ""} ${cmp != null && i === cmp - 1 ? c.pipCmp : ""}`} />
+        ))}
+      </span>
+      <span className={`${s.num} ${c.barValue}`}>
+        {value}
+        {diff !== 0 && <span className={diff > 0 ? c.up : c.down}>{diff > 0 ? ` ▲${diff}` : ` ▼${-diff}`}</span>}
+      </span>
+    </div>
   );
 }
 
