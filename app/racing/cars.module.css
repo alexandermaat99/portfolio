@@ -1,0 +1,30 @@
+/* app/racing/cars.module.css: the Cars tab (inside racing.module.css's .root). */
+.intro { margin: 0 0 12px; line-height: 1.5; max-width: 900px; }
+.grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); margin-bottom: 18px; }
+.card {
+  text-align: left; font: inherit; color: var(--ink); cursor: pointer; display: flex; flex-direction: column; gap: 10px;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 14px;
+}
+.card:hover { border-color: var(--muted); }
+.pinned { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+.head { display: flex; gap: 12px; align-items: center; }
+.logo { font-size: 1.9rem; display: inline-flex; width: 44px; height: 44px; align-items: center; justify-content: center;
+  border: 1px solid var(--line); border-radius: 6px; flex: none; }
+.name { font-weight: 700; font-size: 1rem; line-height: 1.25; }
+.vibe { margin: 0; font-size: 0.86rem; line-height: 1.45; color: var(--muted); }
+.bars { display: flex; flex-direction: column; gap: 8px; }
+.barTop { display: flex; justify-content: space-between; align-items: baseline; }
+.barLabel { font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; }
+.barValue { font-size: 0.86rem; font-weight: 700; }
+.up { color: var(--pb); font-size: 0.72rem; }
+.down { color: var(--bad); font-size: 0.72rem; }
+.track { position: relative; height: 6px; background: var(--hair); border-radius: 3px; margin-top: 4px; }
+.fill { position: absolute; inset: 0 auto 0 0; background: var(--ink); border-radius: 3px; }
+.marker { position: absolute; top: -3px; width: 2px; height: 12px; background: var(--accent); }
+.note { margin-top: 3px; font-size: 0.72rem; }
+.tracks { list-style: none; margin: 2px 0 0; padding: 8px 0 0; border-top: 1px solid var(--hair); display: flex; flex-direction: column; gap: 6px; }
+.tracks li { display: grid; grid-template-columns: auto 1fr auto; column-gap: 8px; align-items: center; font-size: 0.82rem; }
+.tracks li > span:last-child { grid-column: 2 / 4; }
+.trackName { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.record { color: var(--record); font-weight: 700; }
+.othersTitle { margin-top: 6px; }
