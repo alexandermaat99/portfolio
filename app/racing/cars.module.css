@@ -24,3 +24,8 @@
 .pips i { height: 8px; border-radius: 2px; background: var(--hair); }
 .pips i.pipOn { background: var(--accent); }
 .pips i.pipCmp { box-shadow: 0 0 0 1.5px var(--ink); }
+
+.specs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; font-size: 0.72rem; color: var(--muted);
+  border-top: 1px solid var(--hair); padding-top: 8px; }
+.specs b { display: block; color: var(--ink); font-size: 0.95rem; }
+.src { font-size: 0.5rem; margin-left: 3px; color: var(--muted); letter-spacing: 0.08em; }
