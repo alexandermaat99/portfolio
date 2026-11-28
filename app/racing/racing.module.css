@@ -346,3 +346,11 @@
 .tabs::-webkit-scrollbar { display: none; }
 .tab { flex: none; }
 @media (max-width: 480px) { .tab { padding: 8px 11px 9px; font-size: 0.64rem; letter-spacing: 0.08em; } }
+
+/* AI session recaps + driver profile blurb */
+.recaps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+.recaps li { border-left: 3px solid var(--c); padding: 2px 0 2px 12px; }
+.recapWho { display: flex; align-items: center; gap: 8px; }
+.recapWho > .small { margin-left: auto; font-family: var(--mono); }
+.recaps p { margin: 5px 0 0; line-height: 1.5; font-size: 0.92rem; }
+.profileBlurb { margin: 0 0 10px; font-style: italic; line-height: 1.5; font-size: 0.92rem; }

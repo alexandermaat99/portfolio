@@ -383,10 +383,34 @@ function LiveView({
     </section>
   ) : null;
 
+  // AI session recaps from the night shown here (casual; drivers get a coaching version by email).
+  const nightId = tonightActive ? data.session_id : data.nights[0]?.id;
+  const recaps = (data.recaps ?? []).filter((r) => r.session_id === nightId).slice(0, 8);
+  const recapsCard = recaps.length ? (
+    <section className={s.card}>
+      <h2 className={s.cardTitle}><span>Session recaps</span></h2>
+      <ul className={s.recaps}>
+        {recaps.map((r) => {
+          const d = driverById(r.driver_id);
+          return (
+            <li key={r.stint} style={colorVar(d?.color)}>
+              <div className={s.recapWho}>
+                {d && <Avatar driver={d} size="xs" />}
+                {d ? <DriverName driver={d} inline /> : "?"}
+                <span className={`${s.small} ${s.muted}`}>{fmtClock(r.created_at)}</span>
+              </div>
+              <p>{r.text}</p>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  ) : null;
+
   return (
     <div className={s.liveGrid}>
       <div>{nowCard}{board}</div>
-      <div>{lapsCard}</div>
+      <div>{recapsCard}{lapsCard}</div>
     </div>
   );
 }
@@ -590,7 +614,7 @@ function DriversView({ data }: { data: NonNullable<RacingSnapshot["data"]> }) {
         <span className={s.muted}>{profiles.length}</span>
       </h2>
       <ul className={s.driverList}>
-        {profiles.map(({ driver, stats: st, badges, id }) => {
+        {profiles.map(({ driver, stats: st, badges, id, profile }) => {
           const isOpen = open === id;
           return (
             <li key={id} className={s.dlItem} style={colorVar(driver!.color)}>
@@ -613,6 +637,7 @@ function DriversView({ data }: { data: NonNullable<RacingSnapshot["data"]> }) {
               </button>
               {isOpen && (
                 <div className={s.profileDetail}>
+                  {profile && <p className={s.profileBlurb}>{profile}</p>}
                   <div className={s.profileSub}>
                     First lap {st.first_at ? fmtDay(st.first_at) : "—"} · last raced {st.last_at ? fmtDay(st.last_at) : "—"}
                   </div>
