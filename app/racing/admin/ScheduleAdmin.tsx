@@ -9,8 +9,7 @@ interface Win { id: string; start: number; end: number }
 interface Booking { id: string; start: number; end: number; name: string }
 interface Sched { windows: Win[]; bookings: Booking[] }
 
-const when = (t: number) => new Date(t * 1000).toLocaleString([], { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
-const hm = (t: number) => new Date(t * 1000).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+import { rigTime as hm, rigToUnix, rigTzLabel, rigWhen as when } from "../lib/rigtime";
 
 async function post(path: string, body: unknown): Promise<Sched> {
   const res = await fetch(path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
@@ -23,6 +22,7 @@ export default function ScheduleAdmin() {
   const [sched, setSched] = useState<Sched | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [repeat, setRepeat] = useState("once");
   useEffect(() => {
     fetch("/api/racing/schedule", { cache: "no-store" }).then((r) => r.json()).then(setSched).catch(() => setErr("Couldn't load the schedule"));
   }, []);
@@ -38,17 +38,27 @@ export default function ScheduleAdmin() {
     const form = e.currentTarget, f = new FormData(form);
     const date = String(f.get("date") || ""), from = String(f.get("from") || ""), to = String(f.get("to") || "");
     if (!date || !from || !to) return setErr("Pick a date, start and end time");
-    const start = new Date(`${date}T${from}`).getTime() / 1000;
-    let end = new Date(`${date}T${to}`).getTime() / 1000;
+    const start = rigToUnix(date, from);
+    let end = rigToUnix(date, to);
     if (end <= start) end += 86400; // past midnight
-    if (await run(() => post("/api/racing/admin/schedule", { action: "add", start, end, weeks: Number(f.get("weeks") || 1) }))) form.reset();
+    const repeat = String(f.get("repeat") || "once");
+    let count = 1, step_days = 7;
+    if (repeat === "daily") {
+      const until = String(f.get("until") || "");
+      if (!until) return setErr("Pick the last day");
+      count = Math.round((rigToUnix(until, from) - start) / 86400) + 1;
+      step_days = 1;
+      if (count < 1) return setErr("The last day is before the first");
+    } else if (repeat.startsWith("weekly")) count = Number(repeat.slice(6));
+    if (await run(() => post("/api/racing/admin/schedule", { action: "add", start, end, count, step_days }))) { form.reset(); setRepeat("once"); }
   };
 
   return (
     <section className={s.card}>
       <h2 className={s.cardTitle}><span>Practice schedule</span><span className={s.small}>1-hour slots</span></h2>
       <p className={`${s.small} ${s.muted}`} style={{ marginTop: 0 }}>
-        Open the times the rig is free; friends book 1-hour slots inside them on /racing/schedule.
+        Open the times the rig is free; friends book 1-hour slots inside them on /racing/schedule. All times are the rig&apos;s
+        local time ({rigTzLabel()}), wherever you are.
       </p>
       <form className={a.form} onSubmit={add}>
         <div className={a.inline}>
@@ -56,13 +66,15 @@ export default function ScheduleAdmin() {
           <label>From<input type="time" name="from" defaultValue="18:00" step={3600} required /></label>
           <label>To<input type="time" name="to" defaultValue="22:00" step={3600} required /></label>
           <label>Repeat
-            <select name="weeks" defaultValue="1">
-              <option value="1">Just this day</option>
-              <option value="2">Weekly for 2 weeks</option>
-              <option value="4">Weekly for 4 weeks</option>
-              <option value="8">Weekly for 8 weeks</option>
+            <select name="repeat" value={repeat} onChange={(e) => setRepeat(e.target.value)}>
+              <option value="once">Just this day</option>
+              <option value="daily">Every day until…</option>
+              <option value="weekly2">Weekly for 2 weeks</option>
+              <option value="weekly4">Weekly for 4 weeks</option>
+              <option value="weekly8">Weekly for 8 weeks</option>
             </select>
           </label>
+          {repeat === "daily" && <label>Last day<input type="date" name="until" required /></label>}
         </div>
         <button className={`${a.btn} ${a.primary}`} disabled={busy}>Open these times</button>
       </form>

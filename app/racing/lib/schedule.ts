@@ -27,13 +27,15 @@ export async function loadSchedule(now = Date.now() / 1000): Promise<{ windows: 
   return { windows, bookings };
 }
 
-/** Open one window, or the same window every week for `weeks` weeks. */
-export async function addWindows(start: number, end: number, weeks = 1): Promise<number> {
+/** Open one window, or the same window repeated `count` times, `stepDays` apart (1 = daily, 7 = weekly). */
+export async function addWindows(start: number, end: number, count = 1, stepDays = 7): Promise<number> {
   if (!(end - start >= SLOT) || end - start > 16 * 3600) throw new Error("A window needs to be 1 to 16 hours long");
   if (end < Date.now() / 1000) throw new Error("That window is already over");
-  const n = Math.max(1, Math.min(12, Math.floor(weeks)));
+  const n = Math.max(1, Math.min(31, Math.floor(count)));
+  const step = stepDays === 1 ? 1 : 7;
   for (let i = 0; i < n; i++) {
-    const w: Window = { id: randomUUID(), start: start + i * 7 * 86400, end: end + i * 7 * 86400 };
+    // Same wall-clock time each day/week (an hour shift at a DST change is acceptable here).
+    const w: Window = { id: randomUUID(), start: start + i * step * 86400, end: end + i * step * 86400 };
     await hashSet(WINDOWS, w.id, JSON.stringify(w));
   }
   return n;
