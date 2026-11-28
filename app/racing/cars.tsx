@@ -35,7 +35,7 @@ export function CarsView() {
               )}
               <div className={c.body}>
                 <div className={c.head}>
-                  <span className={c.logo}><BrandLogo car={spec.name} /></span>
+                  <span className={c.logo}><BrandLogo car={spec.name} large /></span>
                   <div>
                     <div className={c.name}>{spec.name}</div>
                     <div className={`${s.small} ${s.muted}`}>{spec.engine} · {spec.layout} · {spec.drivetrain}</div>
