@@ -147,6 +147,7 @@ export interface RacingData {
   driver_stats?: DriverProfile[];
   competitions?: Competition[];
   analysis?: Record<string, TrackAnalysis>;
+  cars?: CarStat[]; // per-car stats for the Cars tab
   recaps?: { stint: number; driver_id: number; session_id: number; track_id: number; track_config: string; created_at: number; text: string }[]; // AI session recaps // track key -> per-driver traces, sectors, history
   drivers: Driver[];
   session_id: number | null;
@@ -197,4 +198,14 @@ export interface TrackAnalysis {
     sectors?: (number | null)[]; // best clean time through each sector
     history: [number, number][]; // recent clean laps: [unix time, lap time], oldest first
   }>;
+}
+
+/** Per-car numbers for the Cars tab (simstats/analysis.py car_stats). */
+export interface CarStat {
+  car: string;
+  laps: number;
+  clean_laps: number;
+  drivers: number;
+  seconds: number;
+  tracks: { track_key: string; track_name: string; best: number; driver_id: number | null; record: number | null }[];
 }
