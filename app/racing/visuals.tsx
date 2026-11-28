@@ -23,8 +23,12 @@ export function brandFor(carName: string | null | undefined): string | null {
   return BRANDS.find((b) => lower.includes(b)) ?? null;
 }
 
-export function BrandLogo({ car }: { car: string | null | undefined }) {
-  const b = brandFor(car);
+// Wordmark logos shrink to a thin line at text size: use a compact mark when small.
+const SMALL_MARK: Record<string, string> = { amg: "mercedes-star", mclaren: "mclaren-speedmark" };
+
+export function BrandLogo({ car, large = false }: { car: string | null | undefined; large?: boolean }) {
+  const brand = brandFor(car);
+  const b = brand && !large ? SMALL_MARK[brand] ?? brand : brand;
   if (!b) return null;
   return (
     <span
