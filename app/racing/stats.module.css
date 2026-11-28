@@ -1,0 +1,56 @@
+/* app/racing/stats.module.css: the Stats tab (inside racing.module.css's .root). */
+
+.trackBar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+.trackPick { display: inline-flex; align-items: center; gap: 8px; }
+.trackPick select, .driverPick select {
+  font: inherit; font-size: 0.95rem; font-weight: 600; color: var(--ink); background: var(--panel2);
+  border: 1px solid var(--line); border-radius: 4px; padding: 7px 10px; max-width: 100%;
+}
+.cols { display: grid; gap: 16px; align-items: start; }
+@media (min-width: 1100px) { .cols { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+.cols > section { margin-bottom: 0; }
+
+.vs { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.vsWord { font-family: var(--mono); font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em; }
+.driverPick { display: inline-flex; align-items: center; gap: 8px; }
+.headline { font-size: 1rem; line-height: 1.5; margin: 12px 0 6px; }
+
+.compareGrid { display: grid; gap: 12px; align-items: center; }
+@media (min-width: 900px) { .compareGrid { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.4fr); } }
+
+.mapFig, .chartFig { margin: 0; min-width: 0; }
+.map { width: 100%; max-height: 300px; display: block; }
+.mapBase { fill: none; stroke: var(--line); stroke-width: 5; stroke-linejoin: round; }
+.startDot { fill: var(--ink); stroke: #0a0a0a; stroke-width: 1.2; }
+.hoverDot { fill: var(--ink); stroke: #0a0a0a; stroke-width: 2; }
+.mapCaption { font-size: 0.78rem; margin-top: 6px; min-height: 1.3em; }
+
+.chart { width: 100%; height: auto; display: block; overflow: visible; }
+.grid { stroke: var(--hair); stroke-width: 1; }
+.zero { stroke: var(--muted); stroke-width: 1; }
+.sectorLine { stroke: var(--line); stroke-width: 1; stroke-dasharray: 3 4; }
+.axis { fill: var(--muted); font-family: var(--mono); font-size: 10px; }
+.axisLabel { fill: var(--muted); font-family: var(--mono); font-size: 10px; letter-spacing: 0.04em; }
+.gapLine { fill: none; stroke: var(--ink); stroke-width: 2; stroke-linejoin: round; }
+.series { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.cross { stroke: var(--muted); stroke-width: 1; }
+.ring { stroke: #121212; stroke-width: 2; }
+
+.legendRow { margin-bottom: 6px; font-size: 0.8rem; }
+.legend { display: inline-flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+.who { display: inline-flex; align-items: center; gap: 6px; }
+.swatch { width: 10px; height: 10px; border-radius: 50%; background: var(--c, var(--line)); display: inline-block; flex: none; }
+
+.sectorTable { margin-top: 12px; }
+.win { color: var(--ink); font-weight: 700; }
+.purple { color: var(--record); font-weight: 700; }
+.strong { font-weight: 700; }
+
+/* tables: first column left, numbers right */
+.table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+.table th { font-family: var(--mono); font-size: 0.58rem; font-weight: 400; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); text-align: right; padding: 6px 6px; border-bottom: 1px solid var(--hair); white-space: nowrap; }
+.table td { text-align: right; padding: 9px 6px; border-bottom: 1px solid var(--hair); white-space: nowrap; }
+.table th:first-child, .table td:first-child { text-align: left; padding-left: 0; }
+.table th:last-child, .table td:last-child { padding-right: 0; }
+.table tr:last-child td { border-bottom: 0; }
+.nameCell { max-width: 0; width: 40%; overflow: hidden; text-overflow: ellipsis; }

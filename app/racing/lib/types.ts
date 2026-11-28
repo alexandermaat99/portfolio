@@ -145,6 +145,7 @@ export interface RacingData {
   track_maps?: Record<string, string>; // track key -> SVG path of the outline (0-100 box)
   driver_stats?: DriverProfile[];
   competitions?: Competition[];
+  analysis?: Record<string, TrackAnalysis>; // track key -> per-driver traces, sectors, history
   drivers: Driver[];
   session_id: number | null;
   tonight: ComboStandings[];
@@ -182,4 +183,16 @@ export interface RacingSnapshot {
   live: RacingLive | null;
   data: RacingData | null;
   now: number; // server clock, seconds
+}
+
+/** Per-track numbers for the Stats tab (simstats/analysis.py). */
+export interface TrackAnalysis {
+  sector_count: number | null;
+  sector_bounds: number[] | null; // lap fraction where each sector starts
+  drivers: Record<string, {
+    trace?: number[]; // lap time at 0%, 1% ... 100% of their fastest clean lap
+    trace_car?: string;
+    sectors?: (number | null)[]; // best clean time through each sector
+    history: [number, number][]; // recent clean laps: [unix time, lap time], oldest first
+  }>;
 }
