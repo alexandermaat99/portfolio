@@ -6,17 +6,20 @@
 import { useState } from "react";
 import s from "./racing.module.css";
 import c from "./cars.module.css";
-import { GT3_LINEUP, RATING_LABELS, type Ratings } from "./lib/cars";
+import { allRatings, GT3_LINEUP, RATING_LABELS, type Ratings } from "./lib/cars";
 import { BrandLogo } from "./visuals";
 
 export function CarsView() {
   const [pinned, setPinned] = useState<string | null>(null);
-  const pinnedRatings = pinned ? GT3_LINEUP.find((g) => g.name === pinned)?.ratings : undefined;
+  const pinnedSpec = pinned ? GT3_LINEUP.find((g) => g.name === pinned) : undefined;
+  const pinnedRatings = pinnedSpec ? allRatings(pinnedSpec) : undefined;
+  const fromSpecs = new Set(["topSpeed", "acceleration"]);
   return (
     <>
       <p className={`${s.small} ${s.muted} ${c.intro}`}>
-        The GT3s on the rig. Stats are our take on how each one feels, out of 10. iRacing balances GT3s, so lap times end
-        up close: pick the one that suits how you drive.
+        The GT3s on the rig. Numbers are from iRacing&apos;s manual for each car (base specs, before iRacing&apos;s balancing).
+        <b>Top speed</b> and <b>Acceleration</b> are worked out from those specs; Braking, Cornering and Control are our take.
+        GT3s are balanced so lap times end up close: pick the one that suits how you drive.
         {pinned ? <> Comparing everything against the <b>{pinned}</b> (tap it again to stop).</> : <> Tap a car to compare the rest against it.</>}
       </p>
       <div className={c.grid}>
@@ -39,13 +42,18 @@ export function CarsView() {
                   </div>
                 </div>
                 <p className={c.vibe}>{spec.vibe}</p>
-                {spec.ratings && (
-                  <div className={c.bars}>
-                    {(Object.keys(RATING_LABELS) as (keyof Ratings)[]).map((k) => (
-                      <Rating key={k} label={RATING_LABELS[k]} value={spec.ratings![k]} cmp={!isPinned ? pinnedRatings?.[k] : undefined} />
-                    ))}
-                  </div>
-                )}
+                <div className={`${c.specs} ${s.num}`}>
+                  <span><b>{spec.specs.bhp}</b> bhp</span>
+                  <span><b>{spec.specs.torqueNm}</b> Nm</span>
+                  <span><b>{spec.specs.kgWithDriver.toLocaleString()}</b> kg</span>
+                  <span><b>{Math.round(spec.specs.bhp / (spec.specs.kgWithDriver / 1000))}</b> bhp/t</span>
+                </div>
+                <div className={c.bars}>
+                  {(Object.keys(RATING_LABELS) as (keyof Ratings)[]).map((k) => (
+                    <Rating key={k} label={RATING_LABELS[k]} value={allRatings(spec)[k]} measured={fromSpecs.has(k)}
+                      cmp={!isPinned ? pinnedRatings?.[k] : undefined} />
+                  ))}
+                </div>
               </div>
             </button>
           );
@@ -55,11 +63,13 @@ export function CarsView() {
   );
 }
 
-function Rating({ label, value, cmp }: { label: string; value: number; cmp?: number }) {
+function Rating({ label, value, cmp, measured }: { label: string; value: number; cmp?: number; measured?: boolean }) {
   const diff = cmp != null ? value - cmp : 0;
   return (
     <div className={c.rating}>
-      <span className={c.barLabel}>{label}</span>
+      <span className={c.barLabel} title={measured ? "Worked out from the manual specs" : "Our take"}>
+        {label}{measured && <sup className={c.src}>spec</sup>}
+      </span>
       <span className={c.pips} aria-label={`${value} out of 10`}>
         {Array.from({ length: 10 }, (_, i) => (
           <i key={i} className={`${i < value ? c.pipOn : ""} ${cmp != null && i === cmp - 1 ? c.pipCmp : ""}`} />
