@@ -90,6 +90,7 @@ export interface DriverProfile {
     favorite_track: { track_id: number; track_name: string; track_config: string; laps: number } | null;
   };
   badges: { key: string; label: string; tier: "record" | "gold" | "good" | "bad" | "plain" }[];
+  profile?: string | null; // AI-written blurb
 }
 
 export interface CompetitionRow {
@@ -145,7 +146,8 @@ export interface RacingData {
   track_maps?: Record<string, string>; // track key -> SVG path of the outline (0-100 box)
   driver_stats?: DriverProfile[];
   competitions?: Competition[];
-  analysis?: Record<string, TrackAnalysis>; // track key -> per-driver traces, sectors, history
+  analysis?: Record<string, TrackAnalysis>;
+  recaps?: { stint: number; driver_id: number; session_id: number; track_id: number; track_config: string; created_at: number; text: string }[]; // AI session recaps // track key -> per-driver traces, sectors, history
   drivers: Driver[];
   session_id: number | null;
   tonight: ComboStandings[];
