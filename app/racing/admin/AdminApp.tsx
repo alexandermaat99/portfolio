@@ -25,6 +25,18 @@ const toLocal = (ts: number | null) => {
 const fromLocal = (v: string) => (v ? new Date(v).getTime() / 1000 : null);
 const num = (v: string) => (v.trim() === "" ? null : Math.max(0, Math.round(Number(v))) || 0);
 
+// Email on file? "unknown" = an existing driver before the PC's first sync (it has the emails).
+type EmailState = "yes" | "missing" | "unknown";
+const emailState = (d: ViewDriver, pcReady: boolean): EmailState =>
+  d.email ? "yes" : pcReady || d.id == null ? "missing" : "unknown";
+
+function EmailTag({ state }: { state: EmailState }) {
+  if (state === "yes") return <span className={`${s.chip} ${a.tagOk}`} title="Gets coaching and competition emails">email ✓</span>;
+  if (state === "missing")
+    return <span className={`${s.chip} ${s.chipBad}`} title="No email: won't get coaching or competition emails. Add one with Edit.">no email</span>;
+  return <span className={s.chip} title="Not known until the sim PC syncs with this page">email ?</span>;
+}
+
 async function call(path: string, body: unknown): Promise<AdminState> {
   const res = await fetch(path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
   const json = await res.json().catch(() => ({}));
@@ -111,7 +123,16 @@ export default function AdminApp({ initial }: { initial: AdminState }) {
 
         <div className={a.grid}>
           <section className={s.card}>
-            <h2 className={s.cardTitle}><span>Drivers</span><span className={s.small}>{drivers.length}</span></h2>
+            <h2 className={s.cardTitle}>
+              <span>Drivers</span>
+              <span className={s.small}>
+                {(() => {
+                  const missing = drivers.filter((d) => emailState(d, st.pc_ready) === "missing").length;
+                  return missing ? <span className={a.bad}>{missing} without email · </span> : null;
+                })()}
+                {drivers.length}
+              </span>
+            </h2>
             <ul className={a.list}>
               {drivers.map((d) => <DriverRow key={d.key} d={d} busy={busy} send={send} pcReady={st.pc_ready} />)}
             </ul>
@@ -137,7 +158,7 @@ export default function AdminApp({ initial }: { initial: AdminState }) {
                 <CompForm key={c.key} comp={c} st={st} busy={busy} onCancel={() => setEditingComp(null)}
                   onSave={async (fields) => (await send({ type: "comp.save", comp: refOf(c.key), fields })) && setEditingComp(null)} />
               ) : (
-                <CompCard key={c.key} c={c} drivers={drivers} busy={busy} send={send} onEdit={() => setEditingComp(c)} />
+                <CompCard key={c.key} c={c} drivers={drivers} busy={busy} send={send} pcReady={st.pc_ready} onEdit={() => setEditingComp(c)} />
               ),
             )}
             {editingComp === "new" ? (
@@ -179,7 +200,8 @@ function DriverRow({ d, busy, send, pcReady }: { d: ViewDriver; busy: boolean; s
           <b>{d.nickname || d.name}</b> <span className={s.muted}>{d.nickname ? d.name : ""}</span>
           {d.pending && <span className={s.chip}>waiting</span>}
           {d.beginner && <span className={s.chip}>beginner</span>}
-          <span className={a.email}>{d.email || (pcReady || d.id == null ? "no email" : "email: after the PC syncs")}</span>
+          <EmailTag state={emailState(d, pcReady)} />
+          {d.email && <span className={a.email}>{d.email}</span>}
         </span>
         <button className={a.linkBtn} onClick={() => setOpen(!open)}>{open ? "Close" : "Edit"}</button>
       </div>
@@ -227,8 +249,8 @@ function AddDriver({ busy, send }: { busy: boolean; send: (op: OpInput) => Promi
 
 // -- competitions ------------------------------------------------------------------------
 
-function CompCard({ c, drivers, busy, send, onEdit }: {
-  c: ViewComp; drivers: ViewDriver[]; busy: boolean; send: (op: OpInput) => Promise<boolean>; onEdit: () => void;
+function CompCard({ c, drivers, busy, send, pcReady, onEdit }: {
+  c: ViewComp; drivers: ViewDriver[]; busy: boolean; send: (op: OpInput) => Promise<boolean>; pcReady: boolean; onEdit: () => void;
 }) {
   const f = c.fields;
   const comp = refOf(c.key);
@@ -261,6 +283,9 @@ function CompCard({ c, drivers, busy, send, onEdit }: {
                   onChange={(ev) => send({ type: "comp.entrant", comp, driver: refOf(d.key), entered: ev.target.checked })} />
                 <span className={a.dot} /> {d.nickname || d.name}
               </label>
+              {e && emailState(d, pcReady) === "missing" && (
+                <span className={`${a.bad} ${a.noEmail}`} title="Won't get overtake alerts, deadline reminders or coaching emails">no email</span>
+              )}
               {e && (
                 <span className={a.entryCtl}>
                   <button className={`${a.pill} ${e.paid ? a.pillOn : ""}`} disabled={busy}

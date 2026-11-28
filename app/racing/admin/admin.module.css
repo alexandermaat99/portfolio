@@ -53,3 +53,6 @@ section > .primary { width: 100%; }
 .pillOn { color: #0a0a0a; background: var(--ink); border-color: var(--ink); }
 
 .login { max-width: 360px; margin: 12vh auto 0; }
+
+.tagOk { color: var(--pb); border-color: rgba(34, 192, 110, 0.5); }
+.noEmail { font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em; text-transform: uppercase; }
