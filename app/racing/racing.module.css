@@ -354,3 +354,14 @@
 .recapWho > .small { margin-left: auto; font-family: var(--mono); }
 .recaps p { margin: 5px 0 0; line-height: 1.5; font-size: 0.92rem; }
 .profileBlurb { margin: 0 0 10px; font-style: italic; line-height: 1.5; font-size: 0.92rem; }
+
+/* the competition track card */
+.trackCard { grid-column: 1 / -1; }
+.trackGrid { display: grid; gap: 16px; align-items: start; }
+@media (min-width: 900px) { .trackGrid { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); } }
+.trackMap { width: 100%; height: auto; display: block; filter: invert(1) hue-rotate(180deg); opacity: 0.92; border-radius: 4px; }
+.trackLogo { width: 180px; height: auto; display: block; filter: invert(1); margin-bottom: 10px; }
+.trackFacts p { margin: 8px 0 0; }
+.trackStats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; font-size: 0.72rem; color: var(--muted); }
+.trackStats b { display: block; color: var(--ink); font-size: 1rem; }
+.trackText { font-size: 0.88rem; line-height: 1.5; }
