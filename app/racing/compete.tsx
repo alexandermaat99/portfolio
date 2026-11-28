@@ -6,6 +6,7 @@ import s from "./racing.module.css";
 import type { Competition, Driver } from "./lib/types";
 import { Avatar, CarLabel, DriverName, TrackIcon } from "./visuals";
 import { trackInfo } from "./lib/tracks";
+import { rigTzLabel, rigWhen } from "./lib/rigtime";
 
 const PHASE_LABEL: Record<Competition["phase"], string> = {
   upcoming: "Not started",
@@ -21,8 +22,8 @@ function fmtLap(t: number | null | undefined) {
   return `${m}:${(t - m * 60).toFixed(3).padStart(6, "0")}`;
 }
 const money = (cents: number) => `$${(cents / 100).toFixed(cents % 100 ? 2 : 0)}`;
-const when = (ts: number | null) =>
-  ts ? new Date(ts * 1000).toLocaleString([], { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : "—";
+// Shown on the rig's clock (that's where you'll be), with the zone so it's never ambiguous.
+const when = (ts: number | null) => (ts ? `${rigWhen(ts)} ${rigTzLabel(ts)}` : "—");
 const limit = (laps: number | null, mins: number | null) =>
   [laps ? `${laps} laps` : "", mins ? `${mins} min` : ""].filter(Boolean).join(" or ") || "unlimited";
 

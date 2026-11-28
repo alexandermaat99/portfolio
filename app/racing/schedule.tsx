@@ -14,8 +14,7 @@ interface Sched { windows: Win[]; bookings: Booking[] }
 
 const MINE = "racingBookings"; // localStorage: booking id -> cancel token
 const SLOT = 3600;
-const day = (t: number) => new Date(t * 1000).toLocaleDateString([], { weekday: "long", month: "short", day: "numeric" });
-const time = (t: number) => new Date(t * 1000).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+import { rigDay as day, rigTime as time, rigTzLabel } from "./lib/rigtime";
 
 function readMine(): Record<string, string> {
   try { return JSON.parse(localStorage.getItem(MINE) || "{}"); } catch { return {}; }
@@ -93,7 +92,7 @@ export function ScheduleView({ drivers }: { drivers: Driver[] }) {
     <>
       <p className={`${s.small} ${s.muted} ${c.intro}`}>
         Book an hour on the sim for practice. Tap a free slot and pick who you are. One driver per slot, up to 3 upcoming
-        slots each. You can cancel your own bookings from this device.
+        slots each. You can cancel your own bookings from this device. Times are the rig&apos;s local time ({rigTzLabel()}).
       </p>
       {err && <div className={`${s.card} ${c.err}`}>{err}</div>}
       {!days.size ? (

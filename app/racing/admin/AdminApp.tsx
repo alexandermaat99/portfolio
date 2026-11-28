@@ -9,6 +9,7 @@ import a from "./admin.module.css";
 import { refOf, type CompFields, type OpInput, type ViewComp, type ViewDriver } from "../lib/admin";
 import type { AdminState } from "../lib/admin-state";
 import ScheduleAdmin from "./ScheduleAdmin";
+import { rigToUnix, unixToRigInput } from "../lib/rigtime";
 
 const GT3_CARS = ["Mercedes-AMG GT3 2020", "Porsche 911 GT3 R (992)", "Ferrari 296 GT3",
   "Audi R8 LMS EVO II GT3", "Ford Mustang GT3", "McLaren 720S GT3 EVO"];
@@ -18,12 +19,9 @@ const ago = (ts: number | null) => {
   const m = Math.round((Date.now() / 1000 - ts) / 60);
   return m < 1 ? "just now" : m < 60 ? `${m} min ago` : m < 48 * 60 ? `${Math.round(m / 60)} h ago` : `${Math.round(m / 1440)} days ago`;
 };
-const toLocal = (ts: number | null) => {
-  if (!ts) return "";
-  const d = new Date(ts * 1000), p = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
-};
-const fromLocal = (v: string) => (v ? new Date(v).getTime() / 1000 : null);
+// Competition dates are in the rig's timezone, wherever you're setting them up from.
+const toLocal = (ts: number | null) => (ts ? unixToRigInput(ts) : "");
+const fromLocal = (v: string) => (v ? rigToUnix(v.slice(0, 10), v.slice(11, 16)) : null);
 const num = (v: string) => (v.trim() === "" ? null : Math.max(0, Math.round(Number(v))) || 0);
 
 // Email on file? "unknown" = an existing driver before the PC's first sync (it has the emails).
