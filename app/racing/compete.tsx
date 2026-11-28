@@ -112,6 +112,7 @@ function Rules({ c, plain = false }: { c?: Competition; plain?: boolean }) {
         <b>Practice{c ? span(c.practice_start, c.practice_end) : " week"}:</b>{" "}
         {practice ? <>up to {practice}{either ? ", whichever comes first" : ""}.</> : c ? <>as much as you like.</> : <>a set number of laps or minutes, whichever comes first.</>}
         {bonus && <> New to the sim? {c ? <b>{bonus}</b> : "Extra practice"}{c ? " more" : ""}.</>}
+        {" "}Laps at other tracks don&apos;t count, so learn the car anywhere else first.
       </>,
     );
   rules.push(

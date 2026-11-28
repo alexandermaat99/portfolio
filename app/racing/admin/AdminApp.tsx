@@ -385,7 +385,7 @@ function CompForm({ comp, st, busy, onSave, onCancel }: {
             <label>Minutes<input name="practice_minutes" inputMode="numeric" defaultValue={f?.practice_minutes ?? ""} /></label>
           </div>
           <div className={a.inline}>
-            <label>Beginners: + laps<input name="practice_bonus_laps" inputMode="numeric" defaultValue={f ? f.practice_bonus_laps ?? "" : 10} /></label>
+            <label>Beginners: + laps<input name="practice_bonus_laps" inputMode="numeric" defaultValue={f ? f.practice_bonus_laps ?? "" : 20} /></label>
             <label>+ minutes<input name="practice_bonus_minutes" inputMode="numeric" defaultValue={f?.practice_bonus_minutes ?? ""} /></label>
           </div>
         </fieldset>
