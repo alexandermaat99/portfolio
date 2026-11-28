@@ -568,7 +568,10 @@ function LapList({
   );
 }
 
+const RECORDS_SHOWN = 3; // top 3 per track; the rest behind "show all"
+
 function RecordsView({ tracks }: { tracks: ComboStandings[] }) {
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
   if (!tracks.length) return <div className={`${s.card} ${s.empty}`}>No records yet.</div>;
   return (
     <div className={s.grid}>
@@ -588,7 +591,16 @@ function RecordsView({ tracks }: { tracks: ComboStandings[] }) {
               {c.nights} night{c.nights === 1 ? "" : "s"}
             </div>
           </div>
-          <StandingsTable rows={c.standings} showAvg />
+          <StandingsTable rows={expanded.has(c.key) ? c.standings : c.standings.slice(0, RECORDS_SHOWN)} showAvg />
+          {c.standings.length > RECORDS_SHOWN && (
+            <button className={s.moreBtn} onClick={() => setExpanded((prev) => {
+              const next = new Set(prev);
+              if (next.has(c.key)) next.delete(c.key); else next.add(c.key);
+              return next;
+            })}>
+              {expanded.has(c.key) ? "Top 3 only" : `Show all ${c.standings.length}`}
+            </button>
+          )}
         </section>
       ))}
     </div>
