@@ -9,6 +9,7 @@ import { LAP_GUSTS, startDotField, type DotField } from "./dots";
 import { CompeteView } from "./compete";
 import { StatsView } from "./stats";
 import { CarsView } from "./cars";
+import { ScheduleView } from "./schedule";
 import { Avatar, BrandLogo, CarLabel, DriverName, nick, TrackIcon, TrackMapsContext } from "./visuals";
 import type { Combo, ComboStandings, Driver, Lap, LiveEvent, RacingSnapshot, Standing } from "./lib/types";
 import { TAB_COOKIE, tabPath, type Tab } from "./lib/tabs";
@@ -205,10 +206,10 @@ export default function RacingApp({ initial, initialTab = "live" }: { initial: R
         )}
 
         <nav className={s.tabs} aria-label="Views">
-          {(["live", "records", "stats", "drivers", "cars", "compete"] as Tab[]).map((t, i) => (
+          {(["live", "records", "stats", "drivers", "cars", "compete", "schedule"] as Tab[]).map((t, i) => (
             <button key={t} className={`${s.tab} ${tab === t ? s.tabOn : ""}`} onClick={() => setTab(t)}>
               <span className={s.k}>0{i + 1}</span>
-              {t === "live" ? (tonightActive || isLive ? "Tonight" : "Latest") : t === "records" ? "Records" : t === "stats" ? "Stats" : t === "drivers" ? "Drivers" : t === "cars" ? "Cars" : "Compete"}
+              {t === "live" ? (tonightActive || isLive ? "Tonight" : "Latest") : t === "records" ? "Records" : t === "stats" ? "Stats" : t === "drivers" ? "Drivers" : t === "cars" ? "Cars" : t === "schedule" ? "Schedule" : "Compete"}
             </button>
           ))}
         </nav>
@@ -230,6 +231,8 @@ export default function RacingApp({ initial, initialTab = "live" }: { initial: R
           <DriversView data={data} />
         ) : tab === "cars" ? (
           <CarsView />
+        ) : tab === "schedule" ? (
+          <ScheduleView drivers={data.drivers} />
         ) : tab === "compete" ? (
           <CompeteView comps={comps} drivers={data.drivers} now={snap.now} />
         ) : (

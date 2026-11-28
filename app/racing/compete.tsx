@@ -104,7 +104,7 @@ function Rules({ c, plain = false }: { c?: Competition; plain?: boolean }) {
   const shots = c ? both(c.attack_laps ? plural(c.attack_laps, "shot") : "", c.attack_minutes ? `${c.attack_minutes} min` : "", " or ") || "unlimited shots" : "a few shots";
   const lead = c ? `1 out-lap${warmups ? ` + ${plural(warmups, "warm-up")}` : ""}` : "an out-lap and a couple of warm-ups";
   const practice = c ? both(c.practice_laps ? plural(c.practice_laps, "lap") : "", c.practice_minutes ? `${c.practice_minutes} min` : "", " or ") : "";
-  const bonus = c ? both(c.practice_bonus_laps ? `+${plural(c.practice_bonus_laps, "lap")}` : "", c.practice_bonus_minutes ? `+${c.practice_bonus_minutes} min` : "", " / ") : "extra";
+  const bonus = c ? both(c.practice_bonus_laps ? `+${plural(c.practice_bonus_laps, "lap")}` : "", c.practice_bonus_minutes ? `+${c.practice_bonus_minutes} min` : "", " / ") : "";
   const either = c ? !!(c.practice_laps && c.practice_minutes) : true;
 
   const rules: ReactNode[] = [];
@@ -113,8 +113,9 @@ function Rules({ c, plain = false }: { c?: Competition; plain?: boolean }) {
       <>
         <b>Practice{c ? span(c.practice_start, c.practice_end) : " week"}:</b>{" "}
         {practice ? <>up to {practice}{either ? ", whichever comes first" : ""}.</> : c ? <>as much as you like.</> : <>a set number of laps or minutes, whichever comes first.</>}
-        {bonus && <> New to the sim? {c ? <b>{bonus}</b> : "Extra practice"}{c ? " more" : ""}.</>}
-        {" "}Laps at other tracks don&apos;t count, so learn the car anywhere else first.
+        {" "}New to the sim?{" "}
+        {c && bonus ? <><b>{bonus}</b> more here, and learn</> : <>Learn</>} the car at Lime Rock or another short track first:
+        laps there don&apos;t count.
       </>,
     );
   rules.push(

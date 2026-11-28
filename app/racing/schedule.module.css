@@ -1,0 +1,24 @@
+/* app/racing/schedule.module.css: the Schedule tab. */
+.intro { margin: 0 0 12px; line-height: 1.5; max-width: 760px; }
+.err { color: var(--bad); }
+.slots { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.slot { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 10px 0; border-bottom: 1px solid var(--hair); min-height: 44px; }
+.slot:last-child { border-bottom: 0; }
+.time { font-size: 0.86rem; min-width: 8.5em; color: var(--muted); }
+.taken .time { color: var(--ink); }
+.who { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c); display: inline-block; }
+.mine .who::after { content: "you"; font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--accent); border: 1px solid var(--accent); border-radius: 3px; padding: 1px 5px; }
+.open { font: inherit; font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer;
+  color: var(--pb); background: transparent; border: 1px dashed rgba(34, 192, 110, 0.6); border-radius: 4px; padding: 7px 12px; }
+.open:hover { background: rgba(34, 192, 110, 0.08); }
+.form { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.form select, .form input { font: inherit; font-size: 0.9rem; color: var(--ink); background: var(--panel2); border: 1px solid var(--line);
+  border-radius: 4px; padding: 7px 9px; }
+.book { font: inherit; font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer;
+  color: #0a0a0a; background: var(--accent); border: 1px solid var(--accent); border-radius: 4px; padding: 8px 14px; }
+.book:disabled { opacity: 0.4; cursor: default; }
+.link { background: none; border: 0; color: var(--muted); cursor: pointer; font-family: var(--mono); font-size: 0.66rem;
+  letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 6px; }
+.link:hover:not(:disabled) { color: var(--accent); }
