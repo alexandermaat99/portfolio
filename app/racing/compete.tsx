@@ -5,6 +5,7 @@ import type { CSSProperties, ReactNode } from "react";
 import s from "./racing.module.css";
 import type { Competition, Driver } from "./lib/types";
 import { Avatar, CarLabel, DriverName, TrackIcon } from "./visuals";
+import { trackInfo } from "./lib/tracks";
 
 const PHASE_LABEL: Record<Competition["phase"], string> = {
   upcoming: "Not started",
@@ -72,6 +73,7 @@ export function CompeteView({ comps, drivers, now }: { comps: Competition[]; dri
             <h2 className={s.cardTitle}><span>Rules</span></h2>
             <Rules c={c} plain />
           </aside>
+          <TrackCard c={c} />
         </div>
       ))}
     </>
@@ -290,6 +292,38 @@ function CompCard({ c, drivers, now }: { c: Competition; drivers: Driver[]; now:
       )}
       <div className={`${s.small} ${s.muted}`} style={{ marginTop: 10 }}>
         {c.entrants} entrant{c.entrants === 1 ? "" : "s"} · laps count on this track, in an allowed car, inside the window
+      </div>
+    </section>
+  );
+}
+
+/** The competition track: map, key facts, a bit of history and where the time is. */
+function TrackCard({ c }: { c: Competition }) {
+  const t = trackInfo(c.track_name, c.track_config);
+  if (!t) return null;
+  return (
+    <section className={`${s.card} ${s.trackCard}`}>
+      <h2 className={s.cardTitle}><span>The track</span><span className={s.small}>{t.layout} layout</span></h2>
+      <div className={s.trackGrid}>
+        {t.map && (
+          // Plain <img> (small, and stays off Vercel's image optimization quota); inverted for the dark theme.
+          // eslint-disable-next-line @next/next/no-img-element
+          <img className={s.trackMap} src={t.map} alt={`${t.name} track map with corner numbers`} width={1254} height={880} loading="lazy" />
+        )}
+        <div className={s.trackFacts}>
+          {t.logo && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img className={s.trackLogo} src={t.logo} alt={t.name} width={480} height={270} loading="lazy" />
+          )}
+          <div className={`${s.trackStats} ${s.num}`}>
+            <span><b>{t.lengthKm} km</b>{t.lengthMi} mi</span>
+            <span><b>{t.turns}</b>turns</span>
+            <span><b>{t.location.split(",")[0]}</b>{t.location.split(",").slice(-1)[0].trim()}</span>
+          </div>
+          {t.corners && <p className={`${s.small} ${s.muted}`}>{t.corners}</p>}
+          <p className={s.trackText}><b>Where the time is.</b> {t.tips}</p>
+          <p className={`${s.trackText} ${s.muted}`}>{t.history}</p>
+        </div>
       </div>
     </section>
   );
