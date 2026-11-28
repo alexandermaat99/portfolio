@@ -1,4 +1,4 @@
-// app/racing/[[...tab]]/page.tsx: /racing (Tonight) and /racing/records, /nights, /drivers, /compete.
+// app/racing/[[...tab]]/page.tsx: /racing (Tonight) and /racing/records, /stats, /drivers, /compete.
 // One optional catch-all route, so switching tabs keeps the same page mounted.
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
@@ -36,6 +36,7 @@ export default async function RacingPage({ params }: Props) {
   const segs = (await params).tab ?? [];
   const tab = segs.length ? parseTab(segs[0]) : "live";
   if (segs.length === 1 && tab === "live") redirect("/racing");
+  if (segs.length === 1 && segs[0] === "nights") redirect("/racing/stats"); // Nights became Stats
   if (segs.length > 1 || !tab || (segs.length === 1 && tab === "live")) notFound();
   let initial: RacingSnapshot;
   try {

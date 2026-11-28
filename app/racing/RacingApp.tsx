@@ -7,8 +7,9 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import s from "./racing.module.css";
 import { LAP_GUSTS, startDotField, type DotField } from "./dots";
 import { CompeteView } from "./compete";
+import { StatsView } from "./stats";
 import { Avatar, BrandLogo, CarLabel, DriverName, nick, TrackIcon, TrackMapsContext } from "./visuals";
-import type { Combo, ComboStandings, Driver, Lap, LiveEvent, Night, RacingSnapshot, Standing } from "./lib/types";
+import type { Combo, ComboStandings, Driver, Lap, LiveEvent, RacingSnapshot, Standing } from "./lib/types";
 import { TAB_COOKIE, tabPath, type Tab } from "./lib/tabs";
 
 
@@ -53,7 +54,7 @@ const colorVar = (c: string | undefined) => ({ "--c": c ?? "var(--border)" }) as
 
 export default function RacingApp({ initial, initialTab = "live" }: { initial: RacingSnapshot; initialTab?: Tab }) {
   const [snap, setSnap] = useState(initial);
-  // The open tab lives in the path (/racing/nights) and a cookie; the server reads them,
+  // The open tab lives in the path (/racing/stats) and a cookie; the server reads them,
   // so the page arrives already on the right tab (no flash on refresh).
   const [tab, setTabState] = useState<Tab>(initialTab);
   const setTab = (t: Tab) => {
@@ -62,7 +63,6 @@ export default function RacingApp({ initial, initialTab = "live" }: { initial: R
     window.history.replaceState(window.history.state, "", tabPath(t));
   };
   const [boardMode, setBoardMode] = useState<"tonight" | "all">("tonight");
-  const [openNight, setOpenNight] = useState<number | null>(null);
   const [toasts, setToasts] = useState<LiveEvent[]>([]);
   const lastEvent = useRef<number | null>(null);
 
@@ -204,10 +204,10 @@ export default function RacingApp({ initial, initialTab = "live" }: { initial: R
         )}
 
         <nav className={s.tabs} aria-label="Views">
-          {(["live", "records", "nights", "drivers", "compete"] as Tab[]).map((t, i) => (
+          {(["live", "records", "stats", "drivers", "compete"] as Tab[]).map((t, i) => (
             <button key={t} className={`${s.tab} ${tab === t ? s.tabOn : ""}`} onClick={() => setTab(t)}>
               <span className={s.k}>0{i + 1}</span>
-              {t === "live" ? (tonightActive || isLive ? "Tonight" : "Latest") : t === "records" ? "Records" : t === "nights" ? "Nights" : t === "drivers" ? "Drivers" : "Compete"}
+              {t === "live" ? (tonightActive || isLive ? "Tonight" : "Latest") : t === "records" ? "Records" : t === "stats" ? "Stats" : t === "drivers" ? "Drivers" : "Compete"}
             </button>
           ))}
         </nav>
@@ -230,7 +230,7 @@ export default function RacingApp({ initial, initialTab = "live" }: { initial: R
         ) : tab === "compete" ? (
           <CompeteView comps={comps} drivers={data.drivers} now={snap.now} />
         ) : (
-          <NightsView nights={data.nights} open={openNight} setOpen={setOpenNight} />
+          <StatsView data={data} comps={comps} now={snap.now} />
         )}
 
         <p className={s.footer}>
@@ -675,48 +675,4 @@ function DriversView({ data }: { data: NonNullable<RacingSnapshot["data"]> }) {
   );
 }
 
-function NightsView({
-  nights,
-  open,
-  setOpen,
-}: {
-  nights: Night[];
-  open: number | null;
-  setOpen: (id: number | null) => void;
-}) {
-  if (!nights.length) return <div className={`${s.card} ${s.empty}`}>No race nights yet.</div>;
-  return (
-    <section className={s.card}>
-      <h2 className={s.cardTitle}><span>Race nights</span></h2>
-      {nights.map((n) => (
-        <div key={n.id}>
-          <button className={s.nightBtn} onClick={() => setOpen(open === n.id ? null : n.id)} aria-expanded={open === n.id}>
-            <span>
-              <span style={{ fontWeight: 700 }}>{n.label}</span>
-              <br />
-              <span className={`${s.small} ${s.muted}`}>
-                {fmtClock(n.started_at)}–{fmtClock(n.ended_at)} · {n.laps} laps · {n.drivers} driver
-                {n.drivers === 1 ? "" : "s"}
-              </span>
-            </span>
-            <span className={s.muted}>{open === n.id ? "▾" : "›"}</span>
-          </button>
-          {open === n.id && (
-            <div className={s.nightBody}>
-              {n.combos.map((c) => (
-                <div key={c.key}>
-                  <h4 className={s.titleRow}>
-                    <TrackIcon trackKey={c.key} />
-                    {trackTitle(c)}
-                  </h4>
-                  <div className={s.comboSub}><CarsList cars={c.cars} /></div>
-                  <StandingsTable rows={c.standings} showAvg />
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      ))}
-    </section>
-  );
-}
+

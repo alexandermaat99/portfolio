@@ -1,10 +1,11 @@
 // Shared by the server page and the client app (which can't export helpers to the server).
-export type Tab = "live" | "records" | "nights" | "drivers" | "compete";
+export type Tab = "live" | "records" | "stats" | "drivers" | "compete";
 
 export const TAB_COOKIE = "racingTab";
 
 export function parseTab(t: string | null | undefined): Tab | null {
-  return t === "live" || t === "records" || t === "nights" || t === "drivers" || t === "compete" ? t : null;
+  if (t === "nights") return "stats"; // the Nights tab became Stats (old links and cookies)
+  return t === "live" || t === "records" || t === "stats" || t === "drivers" || t === "compete" ? t : null;
 }
 
 /** URL for a tab: /racing for Tonight, /racing/<tab> for the rest. */
