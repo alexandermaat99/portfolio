@@ -365,3 +365,8 @@
 .tcStats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; font-size: 0.72rem; color: var(--muted); }
 .tcStats b { display: block; color: var(--ink); font-size: 1rem; }
 .tcText { font-size: 0.88rem; line-height: 1.5; }
+
+/* Records: "show all" under a top-3 leaderboard */
+.moreBtn { display: block; margin: 10px auto 0; background: none; border: 0; cursor: pointer; color: var(--muted);
+  font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 8px; }
+.moreBtn:hover { color: var(--accent); }
